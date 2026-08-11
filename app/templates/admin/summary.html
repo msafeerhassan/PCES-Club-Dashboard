@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Admin Summary - PCES{% endblock %}
+{% block page_title %}Admin Summary{% endblock %}
+{% block content %}
+<div class="stat-grid">
+  <div class="stat-card"><span class="stat-value">{{ total_members }}</span><span class="stat-label">Total members</span></div>
+  <div class="stat-card"><span class="stat-value">{{ upcoming_events }}</span><span class="stat-label">Upcoming events</span></div>
+  <div class="stat-card"><span class="stat-value">{{ submission_count }}</span><span class="stat-label">Submissions received</span></div>
+  <div class="stat-card"><span class="stat-value">{{ active_now }}</span><span class="stat-label">Active coding now</span></div>
+  <div class="stat-card"><span class="stat-value">{{ overall_attendance_rate if overall_attendance_rate is not none else '-' }}{{ '%' if overall_attendance_rate is not none else '' }}</span><span class="stat-label">Overall attendance rate</span></div>
+</div>
+
+<h2>Top contributors</h2>
+<table class="data-table">
+  <tr><th>Member</th><th>Hours</th></tr>
+  {% for m, hours in top_contributors %}
+  <tr><td>{{ m.name }}</td><td>{{ hours }}</td></tr>
+  {% endfor %}
+</table>
+
+{% if section_comparison %}
+<h2>Section comparison</h2>
+<table class="data-table">
+  <tr><th>Section</th><th>Members</th><th>Total hours</th></tr>
+  <tr><td>Boys</td><td>{{ section_comparison.boys_count }}</td><td>{{ section_comparison.boys_hours }}</td></tr>
+  <tr><td>Girls</td><td>{{ section_comparison.girls_count }}</td><td>{{ section_comparison.girls_hours }}</td></tr>
+</table>
+{% endif %}
+
+<h2>Recent submissions</h2>
+<table class="data-table">
+  <tr><th>Member</th><th>Title</th><th>Submitted</th></tr>
+  {% for s in recent_submissions %}
+  <tr><td>{{ s.member.name }}</td><td>{{ s.title }}</td><td>{{ s.submitted_at }}</td></tr>
+  {% endfor %}
+</table>
+
+<h2>Never logged in</h2>
+{% if never_logged_in %}
+<table class="data-table">
+  <tr><th>Name</th><th>Email</th><th>Invited</th></tr>
+  {% for m in never_logged_in %}
+  <tr><td>{{ m.name }}</td><td>{{ m.email }}</td><td>{{ m.created_at.strftime('%Y-%m-%d') }}</td></tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>Everyone has logged in at least once.</p>
+{% endif %}
+{% endblock %}

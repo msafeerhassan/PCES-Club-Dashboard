@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Attendance - {{ event.title }}{% endblock %}
+{% block page_title %}Mark attendance: {{ event.title }}{% endblock %}
+{% block content %}
+<form method="POST">
+  <table class="data-table">
+    <tr><th>Member</th><th>Present</th></tr>
+    {% for m in eligible %}
+    <tr>
+      <td>{{ m.name }}</td>
+      <td><input type="checkbox" name="present" value="{{ m.id }}" {{ 'checked' if existing.get(m.id) else '' }}></td>
+    </tr>
+    {% endfor %}
+  </table>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Save attendance</button>
+    <a href="{{ url_for('events.list_events') }}" class="btn">Cancel</a>
+  </div>
+</form>
+{% endblock %}

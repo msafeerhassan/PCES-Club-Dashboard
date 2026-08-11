@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}My Submissions - PCES{% endblock %}
+{% block page_title %}My submissions{% endblock %}
+{% block content %}
+<a href="{{ url_for('submissions.new_submission') }}" class="btn btn-primary">Submit new project</a>
+<table class="data-table">
+<tr><th>Title</th><th>Event</th><th>Links</th><th>Hackatime project</th><th>Submitted</th><th>Status</th></tr>
+  {% for s in submissions %}
+  <tr>
+    <td>{{ s.title }}</td>
+    <td>{{ s.event.title if s.event else 'Standalone' }}</td>
+    <td>
+      {% if s.demo_url %}<a href="{{ s.demo_url }}" target="_blank">Demo</a>{% endif %}
+      {% if s.github_url %}<a href="{{ s.github_url }}" target="_blank">GitHub</a>{% endif %}
+{% for f in s.files %}<a href="{{ f.file_url }}" target="_blank">{{ f.file_name }}</a>{% endfor %}
+    </td>
+    <td>{{ s.hackatime_project_name or '-' }}</td>
+    <td>{{ s.submitted_at }}</td>
+    <td>{% if s.is_late %}<span class="badge badge-danger">LATE</span>{% elif s.event %}<span class="badge badge-success">On time</span>{% else %}-{% endif %}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

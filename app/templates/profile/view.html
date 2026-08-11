@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}My Profile - PCES{% endblock %}
+{% block page_title %}My profile{% endblock %}
+{% block content %}
+<div class="card">
+  <p>Name: <strong>{{ member.name }}</strong></p>
+  <p>Email: {{ member.email }}</p>
+  <p>Role: {{ member.role.value }}</p>
+  <p>Section: {{ member.section.value if member.section else 'N/A (club-wide role)' }}</p>
+  <p>Account status: {{ 'Active' if member.is_active_account else 'Not yet claimed' }}</p>
+<p>Hackatime: {{ 'Connected' if member.hackatime_connection else 'Not connected' }}</p>
+<p>Joined: {{ member.created_at.strftime('%Y-%m-%d') }}</p>
+<p>Attendance rate: {{ attendance_pct if attendance_pct is not none else 'No events marked yet' }}{{ '%' if attendance_pct is not none else '' }}</p>
+<p>Projects submitted: {{ submission_count }}</p>
+<p>Current coding streak: {{ current_streak if current_streak is not none else '-' }} days</p>
+</div>
+{% endblock %}

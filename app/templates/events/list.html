@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Events - PCES{% endblock %}
+{% block page_title %}Events{% endblock %}
+{% block content %}
+{% if current_user.role.value in ['president', 'vp_boys', 'vp_girls'] %}
+<a href="{{ url_for('events.new_event') }}" class="btn btn-primary">Create event</a>
+{% endif %}
+<table class="data-table">
+  <tr><th>Title</th><th>Scope</th><th>Date</th><th>Submission deadline</th><th>Actions</th></tr>
+  {% for e in events %}
+  <tr>
+    <td>{{ e.title }}</td>
+    <td>{{ e.scope.value }}</td>
+    <td>{{ e.event_date }}</td>
+    <td>{{ e.submission_deadline if e.submission_deadline else '-' }}</td>
+    <td>
+      <a href="{{ url_for('events.edit_event', event_id=e.id) }}">Edit</a>
+      <a href="{{ url_for('attendance.mark_attendance', event_id=e.id) }}">Attendance</a>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

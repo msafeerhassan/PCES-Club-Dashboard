@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}My Attendance - PCES{% endblock %}
+{% block page_title %}My attendance{% endblock %}
+{% block content %}
+<table class="data-table">
+  <tr><th>Event</th><th>Date</th><th>Present</th></tr>
+  {% for r in records %}
+  <tr>
+    <td>{{ r.event.title }}</td>
+    <td>{{ r.event.event_date }}</td>
+    <td>{{ 'Yes' if r.present else 'No' }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

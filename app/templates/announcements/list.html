@@ -1,0 +1,15 @@
+<h1>Announcements</h1>
+{% if current_user.role.value in ['president', 'vp_boys', 'vp_girls'] %}
+<a href="{{ url_for('announcements.new_announcement') }}" class="btn btn-primary">New announcement</a>
+{% endif %}
+<table class="data-table">
+  <tr><th>Title</th><th>Body</th><th>Posted by</th><th>Date</th></tr>
+  {% for a in items %}
+  <tr>
+    <td>{{ a.title }}</td>
+    <td>{{ a.body }}</td>
+    <td>{{ a.created_by.name }}</td>
+    <td>{{ a.created_at }}</td>
+  </tr>
+  {% endfor %}
+</table>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}PCES Dashboard{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="authed">
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="PCES">
+      </div>
+      <nav class="sidebar-nav">
+        <a href="{{ url_for('dashboard.index') }}" class="nav-link">Dashboard</a>
+        <a href="{{ url_for('events.list_events') }}" class="nav-link">Events</a>
+        <a href="{{ url_for('submissions.my_submissions') }}" class="nav-link">My Submissions</a>
+        <a href="{{ url_for('attendance.my_attendance') }}" class="nav-link">My Attendance</a>
+        <a href="{{ url_for('activity.my_activity') }}" class="nav-link">My Activity</a>
+        <a href="{{ url_for('profile.view_profile') }}" class="nav-link">Profile</a>
+
+        {% set is_admin_role = current_user.role.value in ['president', 'vp_boys', 'vp_girls'] %}
+        {% set is_view_role = current_user.role.value in ['president', 'vp_boys', 'vp_girls', 'faculty_advisor'] %}
+        {% if is_view_role %}
+        <div class="sidebar-label">Admin</div>
+        <a href="{{ url_for('admin.summary') }}" class="nav-link">Summary</a>
+        {% if is_admin_role %}
+        <a href="{{ url_for('admin.members_list') }}" class="nav-link">Members</a>
+        {% endif %}
+        <a href="{{ url_for('submissions.all_submissions') }}" class="nav-link">All Submissions</a>
+        <a href="{{ url_for('activity.admin_list') }}" class="nav-link">Member Activity</a>
+        <a href="{{ url_for('reports.export_csv') }}" class="nav-link">Export CSV</a>
+        {% endif %}
+      </nav>
+      <div class="sidebar-footer">
+        <span class="sidebar-user">{{ current_user.name }}</span>
+        <a href="{{ url_for('auth.logout') }}" class="nav-link logout">Log out</a>
+      </div>
+    </aside>
+    <main class="content">
+      <h1 class="page-title">{% block page_title %}{% endblock %}</h1>
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<h1>PCES Club Dashboard</h1>
+<p>The internal hub for the PCES coding and engineering club — members track projects, log coding activity via Hackatime, and stay on top of events and attendance.</p>
+<a href="{{ url_for('auth.login') }}">Log in with Hack Club Auth</a>
+
+<h2>What this dashboard does</h2>
+<ul>
+  <li>Track coding activity automatically via Hackatime</li>
+  <li>Submit and showcase projects, tied to club events or standalone</li>
+  <li>Event schedules and attendance history</li>
+  <li>Section-scoped admin tools for club leadership</li>
+</ul>
+
+<h2>Club stats</h2>
+<ul>
+  <li>{{ total_members }} active members</li>
+  <li>{{ total_events }} events held</li>
+  <li>{{ total_submissions }} projects submitted</li>
+</ul>
+
+<h2>Leadership</h2>
+<ul>
+  {% for l in leadership %}
+  <li>{{ l.name }} — {{ l.role.value }}</li>
+  {% endfor %}
+</ul>
+
+<h2>How to join</h2>
+<p>PCES membership is by invitation from club leadership. If you're a student interested in joining, reach out to a PCES officer or your school's coding club contact — an admin will add you and you'll be able to log in with your Hack Club identity.</p>
+
+<h2>Featured projects</h2>
+{% if featured_projects %}
+<div style="display:flex; gap:16px; flex-wrap:wrap;">
+  {% for p in featured_projects %}
+  <div style="max-width:260px;">
+    {% if p.screenshots %}
+    <img src="{{ p.screenshots[0].image_url }}" style="width:100%;">
+    {% endif %}
+    <h3>{{ p.title }}</h3>
+    <p>by {{ p.member.name }}</p>
+    <p>
+      {% if p.demo_url %}<a href="{{ p.demo_url }}" target="_blank">Demo</a>{% endif %}
+      {% if p.demo_url and p.github_url %} · {% endif %}
+      {% if p.github_url %}<a href="{{ p.github_url }}" target="_blank">GitHub</a>{% endif %}
+    </p>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p>No featured projects yet — check back soon.</p>
+{% endif %}
+
+<h2>Gallery</h2>
+{% if gallery_preview %}
+<div style="display:flex; gap:12px; flex-wrap:wrap;">
+  {% for photo in gallery_preview %}
+  <div>
+    <img src="{{ photo.image_url }}" alt="{{ photo.caption or 'PCES event photo' }}" style="width:150px;">
+    {% if photo.caption %}<p>{{ photo.caption }}</p>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p>No photos yet.</p>
+{% endif %}
+
+<h2>FAQ</h2>
+<p><strong>How do I join PCES?</strong> Reach out to a club officer — membership is added by admins, not self-signup.</p>
+<p><strong>Do I need to know how to code already?</strong> No — PCES welcomes members at all skill levels.</p>
+<p><strong>What is Hackatime?</strong> A free tool that automatically tracks your coding time, which we use to recognize members' work.</p>
+<p><strong>Is my data private?</strong> Yes — member data is only visible to club leadership within their own section, plus the President and Faculty Advisor.</p>
+
+<h2>Connect with us</h2>
+<p><a href="#">Slack</a> · <a href="#">Instagram</a> · <a href="#">Email</a></p>

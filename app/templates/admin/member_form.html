@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit member' if member else 'Add member' }} - PCES{% endblock %}
+{% block page_title %}{{ 'Edit member' if member else 'Add member' }}{% endblock %}
+{% block content %}
+<form method="POST" class="form-card">
+  <label>Name
+    <input type="text" name="name" value="{{ member.name if member else '' }}" required>
+  </label>
+  {% if not member %}
+  <label>Email
+    <input type="email" name="email" required>
+  </label>
+  {% else %}
+  <p class="form-static">Email: {{ member.email }} (cannot be changed)</p>
+  {% endif %}
+  <label>Role
+    <select name="role">
+      {% for r in roles %}
+      <option value="{{ r.value }}" {{ 'selected' if member and member.role == r else '' }}>{{ r.value }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Section
+    <select name="section">
+      <option value="">None (Club-wide role)</option>
+      {% for s in sections %}
+      <option value="{{ s.value }}" {{ 'selected' if member and member.section == s else '' }}>{{ s.value }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="{{ url_for('admin.members_list') }}" class="btn">Cancel</a>
+  </div>
+</form>
+{% endblock %}

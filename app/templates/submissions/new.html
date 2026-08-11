@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Submit Project - PCES{% endblock %}
+{% block page_title %}Submit a project{% endblock %}
+{% block content %}
+<form method="POST" class="form-card" enctype="multipart/form-data">
+  <label>Title
+    <input type="text" name="title" required>
+  </label>
+  <label>Description
+    <textarea name="description"></textarea>
+  </label>
+  <label>Demo URL (optional): <input type="url" name="demo_url"></label><br>
+  <label>GitHub URL (optional): <input type="url" name="github_url"></label><br>
+<label>Project files (optional): <input type="file" name="project_files" multiple></label><br>
+  <label>Hackatime project:
+    <select name="hackatime_project_name">
+      <option value="">-- none --</option>
+      {% for p in hackatime_projects %}
+      <option value="{{ p }}">{{ p }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Link to event (optional)
+    <select name="event_id">
+      <option value="">-- standalone / personal project --</option>
+      {% for e, deadline_passed in eligible_events_annotated %}
+      <option value="{{ e.id }}">{{ e.title }} ({{ e.event_date }}){{ ' - DEADLINE PASSED, will be marked late' if deadline_passed else '' }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <a href="{{ url_for('submissions.my_submissions') }}" class="btn">Cancel</a>
+  </div>
+</form>
+{% endblock %}

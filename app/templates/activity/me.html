@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}My Activity - PCES{% endblock %}
+{% block page_title %}My coding activity{% endblock %}
+{% block content %}
+<div class="card">
+  <p>Status: {% if active %}<span class="badge badge-success">Active now</span>{% else %}<span class="badge">Not active</span>{% endif %}{% if last_seen %} (last seen {{ last_seen }}){% endif %}</p>
+  <p>Hours (last 7 days): <strong>{{ (hours.total_seconds / 3600) | round(1) if hours else 'unavailable' }}</strong></p>
+<p>Current streak: <strong>{{ streak.streak_days if streak else '-' }} days</strong></p>
+<p>Longest streak seen (since connecting): <strong>{{ longest_streak }} days</strong></p>
+<p>Your weekly average: <strong>{{ (hours.total_seconds / 3600 / 7) | round(1) if hours else '-' }} hrs/day</strong> vs. club average: <strong>{{ (club_average / 7) | round(1) if club_average else 0 }} hrs/day</strong></p>
+{% if latest_heartbeat %}
+<p>Most recently used: <strong>{{ latest_heartbeat.editor or 'unknown' }}</strong> on <strong>{{ latest_heartbeat.operating_system or 'unknown' }}</strong></p>
+{% endif %}
+
+<h2>Weekly trend</h2>
+<table class="data-table">
+  <tr>{% for d in weekly_trend %}<th>{{ d.date[5:] }}</th>{% endfor %}</tr>
+  <tr>{% for d in weekly_trend %}<td>{{ d.hours }}h</td>{% endfor %}</tr>
+</table>
+</div>
+<h2>Projects</h2>
+<table class="data-table">
+  <tr><th>Project</th><th>Hours</th><th>Languages</th></tr>
+  {% for p in projects %}
+  <tr>
+    <td>{{ p.name }}</td>
+    <td>{{ (p.total_seconds / 3600) | round(1) }}</td>
+    <td>{{ p.languages | join(', ') }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

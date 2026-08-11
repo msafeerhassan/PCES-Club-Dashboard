@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}All Submissions - PCES{% endblock %}
+{% block page_title %}All submissions{% endblock %}
+{% block content %}
+<form method="GET" class="search-form">
+  <input type="text" name="q" placeholder="Search by member name" value="{{ search }}">
+  <select name="section">
+    <option value="">All sections</option>
+    <option value="boys" {{ 'selected' if section_filter == 'boys' else '' }}>Boys</option>
+    <option value="girls" {{ 'selected' if section_filter == 'girls' else '' }}>Girls</option>
+  </select>
+  <button type="submit" class="btn">Filter</button>
+</form>
+<table class="data-table">
+<tr><th>Member</th><th>Section</th><th>Title</th><th>Event</th><th>Links</th><th>Hackatime project</th><th>Submitted</th><th>Featured</th></tr>
+  {% for s in submissions %}
+  <tr>
+    <td>{{ s.member.name }}</td>
+    <td>{{ s.member.section.value if s.member.section else '-' }}</td>
+    <td>{{ s.title }}</td>
+    <td>{{ s.event.title if s.event else 'Standalone' }}</td>
+    <td>
+      {% if s.demo_url %}<a href="{{ s.demo_url }}" target="_blank">Demo</a>{% endif %}
+      {% if s.github_url %}<a href="{{ s.github_url }}" target="_blank">GitHub</a>{% endif %}
+{% for f in s.files %}<a href="{{ f.file_url }}" target="_blank">{{ f.file_name }}</a>{% endfor %}
+    </td>
+    <td>{{ s.hackatime_project_name or '-' }}{% if s.hackatime_project_name %} <a href="{{ url_for('submissions.hackatime_detail', submission_id=s.id) }}">(details)</a>{% endif %}</td>
+<td>{{ s.submitted_at }}</td>
+<td>
+      {% if s.is_featured %}
+      <form method="POST" action="{{ url_for('submissions.unfeature_submission', submission_id=s.id) }}" class="inline-form">
+        <button type="submit" class="btn btn-small">Unfeature</button>
+      </form>
+      {% else %}
+      <a href="{{ url_for('submissions.feature_submission', submission_id=s.id) }}" class="btn btn-small">Feature</a>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

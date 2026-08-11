@@ -1,0 +1,23 @@
+<h1>Resources</h1>
+{% if current_user.role.value in ['president', 'vp_boys', 'vp_girls'] %}
+<a href="{{ url_for('resources.new_resource') }}" class="btn btn-primary">Add resource</a>
+{% endif %}
+
+<table class="data-table">
+  <tr><th>Title</th><th>Category</th><th>Description</th><th>Link</th><th></th></tr>
+  {% for r in items %}
+  <tr>
+    <td>{{ r.title }}</td>
+    <td>{{ r.category or '-' }}</td>
+    <td>{{ r.description or '-' }}</td>
+    <td><a href="{{ r.url }}" target="_blank">Open</a></td>
+    <td>
+      {% if current_user.role.value in ['president', 'vp_boys', 'vp_girls'] %}
+      <form method="POST" action="{{ url_for('resources.delete_resource', resource_id=r.id) }}" class="inline-form">
+        <button type="submit" class="btn btn-small">Delete</button>
+      </form>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>

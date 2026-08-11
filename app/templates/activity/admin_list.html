@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Member Activity - PCES{% endblock %}
+{% block page_title %}Member activity{% endblock %}
+{% block content %}
+<table class="data-table">
+  <tr><th>Member</th><th>Section</th><th>Connected</th><th>Hours (7d)</th><th>Status</th><th></th></tr>
+  {% for row in rows %}
+  <tr>
+    <td>{{ row.member.name }}</td>
+    <td>{{ row.member.section.value if row.member.section else '-' }}</td>
+    <td>{{ 'Yes' if row.connected else 'No' }}</td>
+    <td>{{ row.hours if row.hours is not none else '-' }}</td>
+    <td>{% if row.active %}<span class="badge badge-success">Active now</span>{% else %}-{% endif %}</td>
+    <td><a href="{{ url_for('activity.member_detail', member_id=row.member.id) }}">View</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

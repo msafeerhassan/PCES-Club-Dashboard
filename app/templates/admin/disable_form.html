@@ -1,0 +1,9 @@
+<h1>Disable {{ member.name }}</h1>
+{% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
+<form method="POST" class="form-card">
+  <label>Reason for disabling (required)
+    <textarea name="reason" required></textarea>
+  </label>
+  <button type="submit" class="btn btn-primary">Disable member</button>
+</form>
+<a href="{{ url_for('admin.members_list') }}">Cancel</a>

@@ -1,0 +1,14 @@
+<h1>Hackatime detail: {{ submission.title }}</h1>
+<p>Member: {{ submission.member.name }}</p>
+
+{% if project is none %}
+<p>No Hackatime data available for this submission (not connected, or project not found).</p>
+{% else %}
+<p>Project: {{ project.name }}</p>
+<p>Total time: {{ (project.total_seconds / 3600) | round(1) }} hours</p>
+<p>Languages: {{ project.languages | join(', ') }}</p>
+<p>Last active: {{ project.most_recent_heartbeat }}</p>
+<p>Archived: {{ 'Yes' if project.archived else 'No' }}</p>
+{% endif %}
+
+<a href="{{ url_for('submissions.all_submissions') }}">Back to all submissions</a>
