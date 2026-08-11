@@ -1,20 +1,27 @@
-<h1>Feature: {{ submission.title }}</h1>
-
-{% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
+{% extends "base.html" %}
+{% block title %}Feature Submission - PCES{% endblock %}
+{% block page_title %}Feature: {{ submission.title }}{% endblock %}
+{% block content %}
+{% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
 
 {% if submission.screenshots %}
-<h2>Existing screenshots</h2>
-<div style="display:flex; gap:8px; flex-wrap:wrap;">
-  {% for s in submission.screenshots %}
-  <img src="{{ s.image_url }}" style="width:120px;">
-  {% endfor %}
+<div class="card">
+  <h2>Existing screenshots</h2>
+  <div class="media-grid">
+    {% for s in submission.screenshots %}
+    <img src="{{ s.image_url }}" class="screenshot-thumb" alt="{{ submission.title }} screenshot">
+    {% endfor %}
+  </div>
 </div>
 {% endif %}
 
-<form method="POST" enctype="multipart/form-data">
-  <label>Add screenshot(s) — required if none exist yet:
+<form method="POST" enctype="multipart/form-data" class="card form-card">
+  <label>Add screenshot(s) — required if none exist yet
     <input type="file" name="screenshots" multiple accept="image/*">
-  </label><br>
-  <button type="submit" class="btn btn-primary">Feature this project</button>
+  </label>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Feature this project</button>
+    <a href="{{ url_for('submissions.all_submissions') }}" class="btn">Cancel</a>
+  </div>
 </form>
-<a href="{{ url_for('submissions.all_submissions') }}">Cancel</a>
+{% endblock %}

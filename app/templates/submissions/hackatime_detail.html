@@ -1,14 +1,22 @@
-<h1>Hackatime detail: {{ submission.title }}</h1>
-<p>Member: {{ submission.member.name }}</p>
+{% extends "base.html" %}
+{% block title %}Hackatime Detail - PCES{% endblock %}
+{% block page_title %}Hackatime detail: {{ submission.title }}{% endblock %}
+{% block content %}
+<div class="card">
+  <p>Member: <strong>{{ submission.member.name }}</strong></p>
 
-{% if project is none %}
-<p>No Hackatime data available for this submission (not connected, or project not found).</p>
-{% else %}
-<p>Project: {{ project.name }}</p>
-<p>Total time: {{ (project.total_seconds / 3600) | round(1) }} hours</p>
-<p>Languages: {{ project.languages | join(', ') }}</p>
-<p>Last active: {{ project.most_recent_heartbeat }}</p>
-<p>Archived: {{ 'Yes' if project.archived else 'No' }}</p>
-{% endif %}
+  {% if project is none %}
+  <p>No Hackatime data is available for this submission (member not connected, or project not found).</p>
+  {% else %}
+  <p>Project: {{ project.name }}</p>
+  <p>Total time: {{ (project.total_seconds / 3600) | round(1) }} hours</p>
+  <p>Languages: {{ project.languages | join(', ') }}</p>
+  <p>Last active: {{ project.most_recent_heartbeat }}</p>
+  <p>Archived: {{ 'Yes' if project.archived else 'No' }}</p>
+  {% endif %}
 
-<a href="{{ url_for('submissions.all_submissions') }}">Back to all submissions</a>
+  <div class="form-actions">
+    <a href="{{ url_for('submissions.all_submissions') }}" class="btn">Back to all submissions</a>
+  </div>
+</div>
+{% endblock %}

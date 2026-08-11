@@ -20,11 +20,13 @@
 
 <div class="card">
   <h2>Quick actions</h2>
-  <a href="{{ url_for('submissions.new_submission') }}">Submit a project</a> |
-  <a href="{{ url_for('events.list_events') }}">View events</a> |
-  <a href="{{ url_for('activity.my_activity') }}">My coding activity</a> |
-<a href="{{ url_for('resources.list_resources') }}">Resources</a> |
-  <a href="{{ url_for('profile.view_profile') }}">My profile</a>
+  <p class="link-list-inline">
+    <a href="{{ url_for('submissions.new_submission') }}">Submit a project</a>
+    <a href="{{ url_for('events.list_events') }}">View events</a>
+    <a href="{{ url_for('activity.my_activity') }}">My coding activity</a>
+    <a href="{{ url_for('resources.list_resources') }}">Resources</a>
+    <a href="{{ url_for('profile.view_profile') }}">My profile</a>
+  </p>
 </div>
 
 {% if recent_announcements %}
@@ -56,14 +58,15 @@
 <div class="card">
   <h2>Admin overview</h2>
   <p>Members: {{ admin_summary.total_members }} | Upcoming events: {{ admin_summary.upcoming_events }} | Submissions: {{ admin_summary.submission_count }} | Active now: {{ admin_summary.active_now }}</p>
-  <a href="{{ url_for('admin.summary') }}">Full summary</a>
+  <p class="link-list-inline">
+    <a href="{{ url_for('admin.summary') }}">Full summary</a>
+    {% if sections %}
+    <a href="{{ url_for('reports.export_csv') }}">Export report (CSV)</a>
+    <a href="{{ url_for('gallery.manage') }}">Manage gallery</a>
+    <a href="{{ url_for('announcements.new_announcement') }}">Post announcement</a>
+    {% endif %}
+  </p>
 </div>
-{% if sections %}
-<a href="{{ url_for('admin.summary') }}">Admin summary</a>
-<a href="{{ url_for('reports.export_csv') }}">Export report (CSV)</a>
-<a href="{{ url_for('gallery.manage') }}">Manage gallery</a>
-<a href="{{ url_for('announcements.new_announcement') }}">Post announcement</a>
-{% endif %}
 {% endif %}
 <div class="card">
   <h2>Hackatime</h2>

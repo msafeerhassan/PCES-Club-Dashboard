@@ -4,7 +4,7 @@ from app.extensions import db, oauth
 from app.models.submission import Submission
 from app.models.event import Event
 from app.models.member import Member
-from app.models.enums import EventScopeEnum
+from app.models.enums import EventScopeEnum, SectionEnum
 from app.utils.permissions import visible_sections, VIEW_ALL_ROLES, can_manage_section
 from app.utils.storage import upload_submission_files
 from app.models.submission_file import SubmissionFile
@@ -97,7 +97,12 @@ def all_submissions():
 
     section_filter = request.args.get("section", "").strip()
     if section_filter:
-        query = query.filter(Member.section == section_filter)
+        try:
+            section_enum = SectionEnum(section_filter)
+        except ValueError:
+            section_enum = None
+        if section_enum is not None:
+            query = query.filter(Member.section == section_enum)
 
     subs = query.order_by(Submission.submitted_at.desc()).all()
     return render_template(

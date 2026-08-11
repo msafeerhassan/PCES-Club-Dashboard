@@ -1,9 +1,15 @@
-<h1>Disable {{ member.name }}</h1>
-{% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
-<form method="POST" class="form-card">
+{% extends "base.html" %}
+{% block title %}Disable {{ member.name }} - PCES{% endblock %}
+{% block page_title %}Disable {{ member.name }}{% endblock %}
+{% block content %}
+{% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
+<form method="POST" class="card form-card">
   <label>Reason for disabling (required)
     <textarea name="reason" required></textarea>
   </label>
-  <button type="submit" class="btn btn-primary">Disable member</button>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Disable member</button>
+    <a href="{{ url_for('admin.members_list') }}" class="btn">Cancel</a>
+  </div>
 </form>
-<a href="{{ url_for('admin.members_list') }}">Cancel</a>
+{% endblock %}

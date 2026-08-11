@@ -1,22 +1,28 @@
-<h1>Gallery management</h1>
-<form method="POST" enctype="multipart/form-data">
-  <label>Photo: <input type="file" name="photo" required></label>
-  <label>Caption: <input type="text" name="caption"></label>
+{% extends "base.html" %}
+{% block title %}Gallery Management - PCES{% endblock %}
+{% block page_title %}Gallery management{% endblock %}
+{% block content %}
+<form method="POST" enctype="multipart/form-data" class="card form-card">
+  <label>Photo <input type="file" name="photo" required></label>
+  <label>Caption <input type="text" name="caption"></label>
   <button type="submit" class="btn btn-primary">Upload</button>
 </form>
 
-<table class="data-table">
-  <tr><th>Photo</th><th>Caption</th><th>Uploaded</th><th></th></tr>
-  {% for p in photos %}
-  <tr>
-    <td><img src="{{ p.image_url }}" style="width:100px;"></td>
-    <td>{{ p.caption or '-' }}</td>
-    <td>{{ p.uploaded_at }}</td>
-    <td>
-      <form method="POST" action="{{ url_for('gallery.delete_photo', photo_id=p.id) }}" class="inline-form">
-        <button type="submit" class="btn btn-small">Delete</button>
-      </form>
-    </td>
-  </tr>
-  {% endfor %}
-</table>
+<div class="data-table-wrap">
+  <table class="data-table">
+    <tr><th>Photo</th><th>Caption</th><th>Uploaded</th><th></th></tr>
+    {% for p in photos %}
+    <tr>
+      <td><img src="{{ p.image_url }}" class="photo-thumb" alt="{{ p.caption or 'Gallery photo' }}"></td>
+      <td>{{ p.caption or '-' }}</td>
+      <td>{{ p.uploaded_at }}</td>
+      <td>
+        <form method="POST" action="{{ url_for('gallery.delete_photo', photo_id=p.id) }}" class="inline-form">
+          <button type="submit" class="btn btn-small">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

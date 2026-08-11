@@ -65,7 +65,6 @@ def edit_event(event_id):
     event = Event.query.get_or_404(event_id)
 
     if event.scope != EventScopeEnum.CLUB_WIDE:
-        member_section_equiv = event.scope.value
         if not can_manage_section(current_user, _section_from_event_scope(event.scope)):
             abort(403)
     elif current_user.role.value != "president":
