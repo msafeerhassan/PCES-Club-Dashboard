@@ -1,79 +1,122 @@
 {% extends "base_guest.html" %}
 {% block title %}PCES Club Dashboard{% endblock %}
 {% block content %}
-<section class="hero-card">
-  <h1>PCES Club Dashboard</h1>
-  <p>The internal hub for the PCES coding and engineering club — track projects, coding activity, events, and attendance in one place.</p>
-  <div class="link-row">
-    <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Log in with Hack Club Auth</a>
+
+<header class="gtop">
+  <a href="{{ url_for('main.home') }}" class="gtop-brand">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="PCES">
+    <span>PCES Club</span>
+  </a>
+  <div class="gtop-actions">
+    <button class="theme-toggle" onclick="toggleTheme()" style="background:var(--fill);border-color:var(--border);color:var(--slate);">Theme</button>
+    <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Sign in</a>
   </div>
-  <div class="hero-meta">
-    <span class="hero-pill">{{ total_members }} active members</span>
-    <span class="hero-pill">{{ total_events }} events held</span>
-    <span class="hero-pill">{{ total_submissions }} projects submitted</span>
+</header>
+
+<section class="hero-wrap">
+  <div class="hero-inner">
+    <span class="hero-eyebrow">🚀 PCES Coding & Engineering Club</span>
+    <h1 class="hero-title">Build things. <span class="accent">Ship projects.</span> Grow together.</h1>
+    <p class="hero-sub">The internal hub for PCES — track your coding activity, submit projects, manage events and attendance, all in one place.</p>
+    <div class="hero-cta">
+      <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Log in with Hack Club Auth</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong>{{ total_members }}</strong><span>Members</span></div>
+      <div class="hero-stat"><strong>{{ total_events }}</strong><span>Events held</span></div>
+      <div class="hero-stat"><strong>{{ total_submissions }}</strong><span>Projects shipped</span></div>
+    </div>
   </div>
 </section>
 
-<section class="guest-panel">
-  <h2>What this dashboard does</h2>
-  <ul>
-    <li>Track coding activity automatically via Hackatime.</li>
-    <li>Submit and showcase projects tied to events or standalone work.</li>
-    <li>Manage event schedules and attendance history.</li>
-    <li>Provide section-scoped admin tools for club leadership.</li>
-  </ul>
+<section class="section">
+  <div class="section-head">
+    <h2>What this dashboard does</h2>
+    <p>Everything the club needs, built for how PCES actually runs.</p>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon">⏱</div>
+      <h3>Coding activity</h3>
+      <p>Automatic time tracking via Hackatime — no manual logging.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚢</div>
+      <h3>Project submissions</h3>
+      <p>Ship projects tied to events or on your own, with demos and screenshots.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📅</div>
+      <h3>Events & attendance</h3>
+      <p>Full event schedules with attendance history you can actually see.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>Section-scoped admin</h3>
+      <p>Leadership tools that respect boys/girls section boundaries by design.</p>
+    </div>
+  </div>
 </section>
 
-<section class="guest-panel">
-  <h2>Leadership</h2>
-  <ul>
+<section class="section">
+  <div class="section-head">
+    <h2>Leadership</h2>
+  </div>
+  <div class="leader-grid">
     {% for l in leadership %}
-    <li>{{ l.name }} — {{ l.role.value }}</li>
+    <div class="leader-chip">
+      <span class="leader-avatar">{{ l.name[0] }}</span>
+      <span><strong>{{ l.name }}</strong><span>{{ l.role.value.replace('_', ' ') }}</span></span>
+    </div>
     {% endfor %}
-  </ul>
+  </div>
 </section>
 
-<section class="guest-panel">
-  <h2>How to join</h2>
-  <p>Membership is by invitation from club leadership. Reach out to a PCES officer or your school's coding club contact and an admin can add your account.</p>
-</section>
-
-<section class="guest-panel">
-  <h2>Featured projects</h2>
-  {% if featured_projects %}
+{% if featured_projects %}
+<section class="section">
+  <div class="section-head"><h2>Featured projects</h2></div>
   <div class="project-grid">
     {% for p in featured_projects %}
     <article class="project-card">
-      {% if p.screenshots %}
-      <img src="{{ p.screenshots[0].image_url }}" alt="{{ p.title }}">
-      {% endif %}
-      <h3>{{ p.title }}</h3>
-      <p>by {{ p.member.name }}</p>
-      <p class="link-list-inline">
-        {% if p.demo_url %}<a href="{{ p.demo_url }}" target="_blank" rel="noopener noreferrer">Demo</a>{% endif %}
-        {% if p.github_url %}<a href="{{ p.github_url }}" target="_blank" rel="noopener noreferrer">GitHub</a>{% endif %}
-      </p>
+      {% if p.screenshots %}<img src="{{ p.screenshots[0].image_url }}" alt="{{ p.title }}">{% endif %}
+      <div class="project-card-body">
+        <h3>{{ p.title }}</h3>
+        <p>by {{ p.member.name }}</p>
+        <p class="link-list-inline">
+          {% if p.demo_url %}<a href="{{ p.demo_url }}" target="_blank" rel="noopener noreferrer">Demo</a>{% endif %}
+          {% if p.github_url %}<a href="{{ p.github_url }}" target="_blank" rel="noopener noreferrer">GitHub</a>{% endif %}
+        </p>
+      </div>
     </article>
     {% endfor %}
   </div>
-  {% else %}
-  <p>No featured projects yet — check back soon.</p>
-  {% endif %}
 </section>
+{% endif %}
 
-<section class="guest-panel">
-  <h2>Gallery</h2>
-  {% if gallery_preview %}
+{% if gallery_preview %}
+<section class="section">
+  <div class="section-head"><h2>Gallery</h2></div>
   <div class="media-grid">
     {% for photo in gallery_preview %}
-    <article class="project-card">
-      <img src="{{ photo.image_url }}" alt="{{ photo.caption or 'PCES event photo' }}">
-      {% if photo.caption %}<p>{{ photo.caption }}</p>{% endif %}
-    </article>
+    <img src="{{ photo.image_url }}" alt="{{ photo.caption or 'PCES event photo' }}">
     {% endfor %}
   </div>
-  {% else %}
-  <p>No photos yet.</p>
-  {% endif %}
 </section>
+{% endif %}
+
+<section class="section">
+  <div class="section-head"><h2>FAQ</h2></div>
+  <div class="faq-item"><strong>How do I join PCES?</strong><p>Reach out to a club officer — membership is added by admins, not self-signup.</p></div>
+  <div class="faq-item"><strong>Do I need to know how to code already?</strong><p>No — PCES welcomes members at all skill levels.</p></div>
+  <div class="faq-item"><strong>What is Hackatime?</strong><p>A free tool that automatically tracks your coding time.</p></div>
+  <div class="faq-item"><strong>Is my data private?</strong><p>Yes — member data is only visible to club leadership within their own section, plus the President and Faculty Advisor.</p></div>
+</section>
+
+<div class="cta-band">
+  <h2>Ready to get started?</h2>
+  <p>Sign in with your Hack Club identity to access your dashboard.</p>
+  <a href="{{ url_for('auth.login') }}" class="btn">Log in with Hack Club Auth</a>
+</div>
+
+<footer class="gfooter">PCES Club Dashboard · Built for the club, by the club</footer>
 {% endblock %}

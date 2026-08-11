@@ -4,9 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}PCES Dashboard{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="authed">
+  <script>
+    if (localStorage.getItem('pces-theme') === 'dark') { document.body.classList.add('dark-mode'); }
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('pces-theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+  </script>
   <div class="layout">
     <aside class="sidebar">
       <div class="sidebar-logo">
@@ -39,8 +46,9 @@
         <a href="{{ url_for('reports.export_csv') }}" class="nav-link">Export CSV</a>
         {% endif %}
       </nav>
-      <div class="sidebar-footer">
-        <span class="sidebar-user">{{ current_user.name }}</span>
+<div class="sidebar-footer">
+<span class="sidebar-user">{{ current_user.name }}</span>
+        <button class="theme-toggle" onclick="toggleTheme()">Toggle theme</button>
         <a href="{{ url_for('auth.logout') }}" class="nav-link logout">Log out</a>
       </div>
     </aside>

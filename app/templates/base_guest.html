@@ -4,13 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}PCES Dashboard{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="guest">
-  <main class="guest-content">
-    <div class="guest-shell">
-      {% block content %}{% endblock %}
-    </div>
+  <script>
+    if (localStorage.getItem('pces-theme') === 'dark') { document.body.classList.add('dark-mode'); }
+  </script>
+<main class="guest-content" style="padding:0;">
+    {% block content %}{% endblock %}
   </main>
 </body>
 </html>

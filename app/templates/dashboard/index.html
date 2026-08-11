@@ -2,85 +2,89 @@
 {% block title %}Dashboard - PCES{% endblock %}
 {% block page_title %}Dashboard{% endblock %}
 {% block content %}
-<div class="card">
-  <p>Welcome, <strong>{{ member.name }}</strong> ({{ member.role.value }})</p>
-  <p>Sections you can view: {{ sections | map(attribute='value') | join(', ') if sections else 'Your own data only' }}</p>
-  <p>Access level: {{ 'Read-only' if read_only else 'Full access' }}</p>
-</div>
-{% if pending_tasks %}
-<div class="card">
-  <h2>Pending</h2>
-  <ul>
-    {% for t in pending_tasks %}
-    <li>{{ t }}</li>
-    {% endfor %}
-  </ul>
-</div>
-{% endif %}
 
-<div class="card">
-  <h2>Quick actions</h2>
-  <p class="link-list-inline">
-    <a href="{{ url_for('submissions.new_submission') }}">Submit a project</a>
-    <a href="{{ url_for('events.list_events') }}">View events</a>
-    <a href="{{ url_for('activity.my_activity') }}">My coding activity</a>
-    <a href="{{ url_for('resources.list_resources') }}">Resources</a>
-    <a href="{{ url_for('profile.view_profile') }}">My profile</a>
-  </p>
+<div class="welcome-banner">
+  <h2>Welcome back, {{ member.name.split(' ')[0] }}</h2>
+  <p>{{ member.role.value.replace('_', ' ')|title }}{% if sections %} · Viewing: {{ sections | map(attribute='value') | join(', ') }}{% endif %}</p>
 </div>
 
-{% if recent_announcements %}
-<div class="card">
-  <h2>Announcements</h2>
-  <ul>
-    {% for a in recent_announcements %}
-    <li><strong>{{ a.title }}</strong> — {{ a.body }} <em>({{ a.created_at }})</em></li>
-    {% endfor %}
-  </ul>
-  <a href="{{ url_for('announcements.list_announcements') }}">View all</a>
-</div>
-{% endif %}
+<div class="dash-grid">
+  <div>
+    <div class="card">
+      <h2>Quick actions</h2>
+      <div class="qa-row">
+        <a href="{{ url_for('submissions.new_submission') }}" class="qa-chip">🚢 Submit a project</a>
+        <a href="{{ url_for('events.list_events') }}" class="qa-chip">📅 View events</a>
+        <a href="{{ url_for('activity.my_activity') }}" class="qa-chip">⏱ My activity</a>
+        <a href="{{ url_for('resources.list_resources') }}" class="qa-chip">📚 Resources</a>
+        <a href="{{ url_for('profile.view_profile') }}" class="qa-chip">👤 My profile</a>
+      </div>
+    </div>
 
-<div class="card">
-  <h2>Upcoming events</h2>
-  {% if upcoming_events %}
-  <ul>
-    {% for e in upcoming_events %}
-    <li>{{ e.title }} — {{ e.event_date }}</li>
-    {% endfor %}
-  </ul>
-  {% else %}
-  <p>No upcoming events.</p>
-  {% endif %}
-</div>
-
-{% if admin_summary %}
-<div class="card">
-  <h2>Admin overview</h2>
-  <p>Members: {{ admin_summary.total_members }} | Upcoming events: {{ admin_summary.upcoming_events }} | Submissions: {{ admin_summary.submission_count }} | Active now: {{ admin_summary.active_now }}</p>
-  <p class="link-list-inline">
-    <a href="{{ url_for('admin.summary') }}">Full summary</a>
-    {% if sections %}
-    <a href="{{ url_for('reports.export_csv') }}">Export report (CSV)</a>
-    <a href="{{ url_for('gallery.manage') }}">Manage gallery</a>
-    <a href="{{ url_for('announcements.new_announcement') }}">Post announcement</a>
+    {% if pending_tasks %}
+    <div class="card">
+      <h2>Pending</h2>
+      <ul class="list-clean">
+        {% for t in pending_tasks %}<li>{{ t }}</li>{% endfor %}
+      </ul>
+    </div>
     {% endif %}
-  </p>
-</div>
-{% endif %}
-<div class="card">
-  <h2>Hackatime</h2>
-{% if hackatime_connected %}
-<p>Connected. Coding time in the last 7 days: <strong>{{ (recent_seconds / 3600) | round(1) if recent_seconds is not none else 'unavailable' }} hours</strong></p>
-{% if weekly_trend %}
-<table class="data-table">
-  <tr>{% for d in weekly_trend %}<th>{{ d.date[5:] }}</th>{% endfor %}</tr>
-  <tr>{% for d in weekly_trend %}<td>{{ d.hours }}h</td>{% endfor %}</tr>
-</table>
-{% endif %}
-{% else %}
-  <p>Not connected yet.</p>
-  <a href="{{ url_for('hackatime.connect') }}" class="btn btn-primary">Connect Hackatime</a>
-  {% endif %}
+
+    <div class="card">
+      <h2>Hackatime</h2>
+      {% if hackatime_connected %}
+      <p>Connected · <strong>{{ (recent_seconds / 3600) | round(1) if recent_seconds is not none else 'unavailable' }} hours</strong> in the last 7 days</p>
+      {% if weekly_trend %}
+      <div class="data-table-wrap" style="margin-top:14px;">
+        <table class="data-table">
+          <tr>{% for d in weekly_trend %}<th>{{ d.date[5:] }}</th>{% endfor %}</tr>
+          <tr>{% for d in weekly_trend %}<td>{{ d.hours }}h</td>{% endfor %}</tr>
+        </table>
+      </div>
+      {% endif %}
+      {% else %}
+      <p>Not connected yet.</p>
+      <a href="{{ url_for('hackatime.connect') }}" class="btn btn-primary" style="margin-top:10px;">Connect Hackatime</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div>
+    {% if recent_announcements %}
+    <div class="card">
+      <h2>Announcements</h2>
+      <ul class="list-clean">
+        {% for a in recent_announcements %}
+        <li><span><strong>{{ a.title }}</strong><br><span class="meta">{{ a.body[:60] }}{% if a.body|length > 60 %}…{% endif %}</span></span></li>
+        {% endfor %}
+      </ul>
+      <a href="{{ url_for('announcements.list_announcements') }}" style="font-size:13px;">View all →</a>
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <h2>Upcoming events</h2>
+      {% if upcoming_events %}
+      <ul class="list-clean">
+        {% for e in upcoming_events %}
+        <li>{{ e.title }} <span class="meta">{{ e.event_date }}</span></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p style="color:var(--muted);font-size:14px;">No upcoming events.</p>
+      {% endif %}
+    </div>
+
+    {% if admin_summary %}
+    <div class="card">
+      <h2>Admin overview</h2>
+      <div class="stat-grid">
+        <div class="stat-card"><span class="stat-value">{{ admin_summary.total_members }}</span><span class="stat-label">Members</span></div>
+        <div class="stat-card"><span class="stat-value">{{ admin_summary.submission_count }}</span><span class="stat-label">Submissions</span></div>
+      </div>
+      <a href="{{ url_for('admin.summary') }}" style="font-size:13px; display:inline-block; margin-top:12px;">Full summary →</a>
+    </div>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}
