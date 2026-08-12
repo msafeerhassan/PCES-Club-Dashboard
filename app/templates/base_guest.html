@@ -9,6 +9,10 @@
 <body class="guest">
   <script>
     if (localStorage.getItem('pces-theme') === 'dark') { document.body.classList.add('dark-mode'); }
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('pces-theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
   </script>
 <main class="guest-content" style="padding:0;">
     {% block content %}{% endblock %}
