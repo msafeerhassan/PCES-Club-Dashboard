@@ -3,59 +3,48 @@
 {% block page_title %}Dashboard{% endblock %}
 {% block content %}
 
-<div class="welcome-banner">
-  <h2>Welcome back, {{ member.name.split(' ')[0] }}</h2>
-  <p>{{ member.role.value.replace('_', ' ')|title }}{% if sections %} · Viewing: {{ sections | map(attribute='value') | join(', ') }}{% endif %}</p>
+<div class="home-hero-v2" id="homeHero">
+  <p class="home-eyebrow">{{ member.role.value.replace('_', ' ')|title }}</p>
+  <h2 class="home-hero-title">Welcome back, <span class="marker-highlight">{{ member.name.split(' ')[0] }}</span></h2>
+  {% if sections %}
+  <p class="home-hero-meta">Viewing <strong>{{ sections | map(attribute='value') | join(', ') }}</strong> section data</p>
+  {% endif %}
+
+  <div class="sticker-row">
+    <div class="sticker sticker-red">
+      <strong>{{ (recent_seconds / 3600) | round(1) if recent_seconds is not none else '0' }}h</strong>
+      <span>This week</span>
+    </div>
+    {% if admin_summary %}
+    <div class="sticker sticker-orange"><strong>{{ admin_summary.total_members }}</strong><span>Members</span></div>
+    <div class="sticker sticker-blue"><strong>{{ admin_summary.submission_count }}</strong><span>Submissions</span></div>
+    <div class="sticker sticker-green"><strong>{{ admin_summary.active_now }}</strong><span>Active now</span></div>
+    {% else %}
+    <div class="sticker sticker-orange"><strong>{{ upcoming_events | length }}</strong><span>Upcoming</span></div>
+    {% endif %}
+  </div>
 </div>
+
+<script>
+  (function () {
+    const hero = document.getElementById('homeHero');
+    if (!hero) return;
+    hero.addEventListener('mousemove', (e) => {
+      const rect = hero.getBoundingClientRect();
+      hero.style.setProperty('--spot-x', ((e.clientX - rect.left) / rect.width * 100) + '%');
+      hero.style.setProperty('--spot-y', ((e.clientY - rect.top) / rect.height * 100) + '%');
+    });
+  })();
+</script>
 
 <div class="dash-grid">
   <div>
-    <div class="card">
-      <h2>Quick actions</h2>
-      <div class="qa-row">
-        <a href="{{ url_for('submissions.new_submission') }}" class="qa-chip">🚢 Submit a project</a>
-        <a href="{{ url_for('events.list_events') }}" class="qa-chip">📅 View events</a>
-        <a href="{{ url_for('activity.my_activity') }}" class="qa-chip">⏱ My activity</a>
-        <a href="{{ url_for('resources.list_resources') }}" class="qa-chip">📚 Resources</a>
-        <a href="{{ url_for('profile.view_profile') }}" class="qa-chip">👤 My profile</a>
-      </div>
-    </div>
-
-    {% if pending_tasks %}
-    <div class="card">
-      <h2>Pending</h2>
-      <ul class="list-clean">
-        {% for t in pending_tasks %}<li>{{ t }}</li>{% endfor %}
-      </ul>
-    </div>
-    {% endif %}
-
-    <div class="card">
-      <h2>Hackatime</h2>
-      {% if hackatime_connected %}
-      <p>Connected · <strong>{{ (recent_seconds / 3600) | round(1) if recent_seconds is not none else 'unavailable' }} hours</strong> in the last 7 days</p>
-      {% if weekly_trend %}
-      <div class="data-table-wrap" style="margin-top:14px;">
-        <table class="data-table">
-          <tr>{% for d in weekly_trend %}<th>{{ d.date[5:] }}</th>{% endfor %}</tr>
-          <tr>{% for d in weekly_trend %}<td>{{ d.hours }}h</td>{% endfor %}</tr>
-        </table>
-      </div>
-      {% endif %}
-      {% else %}
-      <p>Not connected yet.</p>
-      <a href="{{ url_for('hackatime.connect') }}" class="btn btn-primary" style="margin-top:10px;">Connect Hackatime</a>
-      {% endif %}
-    </div>
-  </div>
-
-  <div>
     {% if recent_announcements %}
     <div class="card">
-      <h2>Announcements</h2>
+      <div class="card-head"><span class="card-icon" style="background:var(--hc-orange);">✦</span><h2>Announcements</h2></div>
       <ul class="list-clean">
         {% for a in recent_announcements %}
-        <li><span><strong>{{ a.title }}</strong><br><span class="meta">{{ a.body[:60] }}{% if a.body|length > 60 %}…{% endif %}</span></span></li>
+        <li><span><strong>{{ a.title }}</strong><br><span class="meta">{{ a.body[:80] }}{% if a.body|length > 80 %}…{% endif %}</span></span></li>
         {% endfor %}
       </ul>
       <a href="{{ url_for('announcements.list_announcements') }}" style="font-size:13px;">View all →</a>
@@ -63,7 +52,7 @@
     {% endif %}
 
     <div class="card">
-      <h2>Upcoming events</h2>
+      <div class="card-head"><span class="card-icon" style="background:var(--hc-red);">▤</span><h2>Upcoming events</h2></div>
       {% if upcoming_events %}
       <ul class="list-clean">
         {% for e in upcoming_events %}
@@ -74,17 +63,39 @@
       <p style="color:var(--muted);font-size:14px;">No upcoming events.</p>
       {% endif %}
     </div>
+  </div>
 
-    {% if admin_summary %}
+  <div>
+    {% if pending_tasks %}
     <div class="card">
-      <h2>Admin overview</h2>
-      <div class="stat-grid">
-        <div class="stat-card"><span class="stat-value">{{ admin_summary.total_members }}</span><span class="stat-label">Members</span></div>
-        <div class="stat-card"><span class="stat-value">{{ admin_summary.submission_count }}</span><span class="stat-label">Submissions</span></div>
-      </div>
-      <a href="{{ url_for('admin.summary') }}" style="font-size:13px; display:inline-block; margin-top:12px;">Full summary →</a>
+      <div class="card-head"><span class="card-icon" style="background:var(--hc-orange);">!</span><h2>Pending</h2></div>
+      <ul class="list-clean pending">
+        {% for t in pending_tasks %}<li>{{ t }}</li>{% endfor %}
+      </ul>
     </div>
     {% endif %}
+
+    <div class="card" style="height: 330px;">
+      <div class="card-head"><span class="card-icon" style="background:var(--hc-red);">⚡</span><h2>Hackatime</h2></div>
+      {% if hackatime_connected %}
+      <p>Connected · <strong>{{ (recent_seconds / 3600) | round(1) if recent_seconds is not none else 'unavailable' }} hours</strong> in the last 7 days</p>
+      {% if weekly_trend %}
+      {% set max_h = (weekly_trend | map(attribute='hours') | max) or 1 %}
+      <div class="trend-chart">
+        {% for d in weekly_trend %}
+        <div class="trend-bar-wrap">
+          <span class="trend-bar-value">{{ d.hours }}</span>
+          <div class="trend-bar" style="height: {{ ((d.hours / max_h) * 100) if max_h else 0 }}%;"></div>
+          <span class="trend-bar-label">{{ d.date[5:] }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% else %}
+      <p>Not connected yet.</p>
+      <a href="{{ url_for('hackatime.connect') }}" class="btn btn-primary" style="margin-top:10px;">Connect Hackatime</a>
+      {% endif %}
+    </div>
   </div>
 </div>
 {% endblock %}

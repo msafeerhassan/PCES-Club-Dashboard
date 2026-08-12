@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}PCES Dashboard{% endblock %}</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="authed">
   <script>
@@ -23,39 +23,41 @@
         </a>
       </div>
       <nav class="sidebar-nav">
-        <a href="{{ url_for('dashboard.index') }}" class="nav-link {{ 'is-active' if request.endpoint == 'dashboard.index' else '' }}">Dashboard</a>
-        <a href="{{ url_for('events.list_events') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('events.') else '' }}">Events</a>
-        <a href="{{ url_for('submissions.my_submissions') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('submissions.') and request.endpoint not in ['submissions.all_submissions', 'submissions.feature_submission', 'submissions.unfeature_submission'] else '' }}">My Submissions</a>
-        <a href="{{ url_for('attendance.my_attendance') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('attendance.') else '' }}">My Attendance</a>
-        <a href="{{ url_for('activity.my_activity') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('activity.my_activity') else '' }}">My Activity</a>
-        <a href="{{ url_for('resources.list_resources') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('resources.') else '' }}">Resources</a>
-        <a href="{{ url_for('announcements.list_announcements') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('announcements.') else '' }}">Announcements</a>
-        <a href="{{ url_for('profile.view_profile') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('profile.') else '' }}">Profile</a>
+        <a href="{{ url_for('dashboard.index') }}" class="nav-link">Dashboard</a>
+        <a href="{{ url_for('events.list_events') }}" class="nav-link">Events</a>
+        <a href="{{ url_for('submissions.my_submissions') }}" class="nav-link">My Submissions</a>
+        <a href="{{ url_for('attendance.my_attendance') }}" class="nav-link">My Attendance</a>
+        <a href="{{ url_for('activity.my_activity') }}" class="nav-link">My Activity</a>
+        <a href="{{ url_for('resources.list_resources') }}" class="nav-link">Resources</a>
+        <a href="{{ url_for('announcements.list_announcements') }}" class="nav-link">Announcements</a>
+        <a href="{{ url_for('profile.view_profile') }}" class="nav-link">Profile</a>
 
         {% set is_admin_role = current_user.role.value in ['president', 'vp_boys', 'vp_girls'] %}
         {% set is_view_role = current_user.role.value in ['president', 'vp_boys', 'vp_girls', 'faculty_advisor'] %}
         {% if is_view_role %}
         <div class="sidebar-label">Admin</div>
-        <a href="{{ url_for('admin.summary') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('admin.summary') else '' }}">Summary</a>
+        <a href="{{ url_for('admin.summary') }}" class="nav-link">Summary</a>
         {% if is_admin_role %}
-        <a href="{{ url_for('admin.members_list') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('admin.member') else '' }}">Members</a>
+        <a href="{{ url_for('admin.members_list') }}" class="nav-link">Members</a>
         {% endif %}
-        <a href="{{ url_for('submissions.all_submissions') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint in ['submissions.all_submissions', 'submissions.feature_submission', 'submissions.unfeature_submission', 'submissions.hackatime_detail'] else '' }}">All Submissions</a>
-        <a href="{{ url_for('activity.admin_list') }}" class="nav-link {{ 'is-active' if request.endpoint and (request.endpoint.startswith('activity.admin_list') or request.endpoint.startswith('activity.member_detail')) else '' }}">Member Activity</a>
-        <a href="{{ url_for('gallery.manage') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('gallery.') else '' }}">Gallery</a>
+        <a href="{{ url_for('submissions.all_submissions') }}" class="nav-link">All Submissions</a>
+        <a href="{{ url_for('activity.admin_list') }}" class="nav-link">Member Activity</a>
+        {% if is_admin_role %}
+        <a href="{{ url_for('gallery.manage') }}" class="nav-link">Manage Gallery</a>
+        {% endif %}
         <a href="{{ url_for('reports.export_csv') }}" class="nav-link">Export CSV</a>
         {% endif %}
       </nav>
-<div class="sidebar-footer">
-<span class="sidebar-user">{{ current_user.name }}</span>
+      <div class="sidebar-footer">
+        <span class="sidebar-user">{{ current_user.name }}</span>
         <button class="theme-toggle" onclick="toggleTheme()">Toggle theme</button>
         <a href="{{ url_for('auth.logout') }}" class="nav-link logout">Log out</a>
       </div>
     </aside>
     <main class="content">
-      <header class="content-header">
+      <div class="content-header">
         <h1 class="page-title">{% block page_title %}{% endblock %}</h1>
-      </header>
+      </div>
       <div class="content-inner">
         {% block content %}{% endblock %}
       </div>
