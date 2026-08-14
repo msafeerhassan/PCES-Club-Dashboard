@@ -2,19 +2,45 @@
 {% block title %}Attendance - {{ event.title }}{% endblock %}
 {% block page_title %}Mark attendance: {{ event.title }}{% endblock %}
 {% block content %}
-<form method="POST">
-  <table class="data-table">
-    <tr><th>Member</th><th>Present</th></tr>
+
+<form method="POST" id="attendanceForm">
+  <div class="attendance-summary">
+    <span>Present: <strong id="presentCount">0</strong> / {{ eligible | length }}</span>
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn btn-small" onclick="toggleAll(true)">Select all</button>
+      <button type="button" class="btn btn-small" onclick="toggleAll(false)">Clear all</button>
+    </div>
+  </div>
+
+  <div class="attendance-list-card">
     {% for m in eligible %}
-    <tr>
-      <td>{{ m.name }}</td>
-      <td><input type="checkbox" name="present" value="{{ m.id }}" {{ 'checked' if existing.get(m.id) else '' }}></td>
-    </tr>
+    <div class="attendance-row">
+      <span class="attendance-name">{{ m.name }}</span>
+      <label class="toggle-check">
+        <input type="checkbox" name="present" value="{{ m.id }}" class="present-checkbox" {{ 'checked' if existing.get(m.id) else '' }}>
+        <span class="track"></span>
+      </label>
+    </div>
     {% endfor %}
-  </table>
-  <div class="form-actions">
+  </div>
+
+  <div class="form-actions" style="margin-top:18px;">
     <button type="submit" class="btn btn-primary">Save attendance</button>
     <a href="{{ url_for('events.list_events') }}" class="btn">Cancel</a>
   </div>
 </form>
+
+<script>
+  const checkboxes = document.querySelectorAll('.present-checkbox');
+  const counter = document.getElementById('presentCount');
+  function updateCount() {
+    counter.textContent = document.querySelectorAll('.present-checkbox:checked').length;
+  }
+  function toggleAll(state) {
+    checkboxes.forEach(cb => cb.checked = state);
+    updateCount();
+  }
+  checkboxes.forEach(cb => cb.addEventListener('change', updateCount));
+  updateCount();
+</script>
 {% endblock %}

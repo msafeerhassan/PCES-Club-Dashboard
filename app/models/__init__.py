@@ -4,7 +4,6 @@ from app.models.event import Event
 from app.models.attendance import Attendance
 from app.models.submission import Submission
 from app.models.submission_file import SubmissionFile
-from app.models.gallery_photo import GalleryPhoto
 from app.models.announcement import Announcement
 from app.models.submission_screenshot import SubmissionScreenshot
 from app.models.resource import Resource

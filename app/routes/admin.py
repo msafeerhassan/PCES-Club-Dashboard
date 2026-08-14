@@ -37,6 +37,8 @@ def members_list():
 def build_summary_data(current_user):
     from datetime import datetime
     from app.models.event import Event
+    from app.models.attendance import Attendance
+    from app.models.enums import SubmissionStatus
     from app.utils.hackatime_client import get_active_now, get_hours
     from app.extensions import oauth
 
@@ -49,10 +51,15 @@ def build_summary_data(current_user):
     else:
         members = Member.query.filter(Member.section.in_(sections)).all()
 
+    member_ids = [m.id for m in members]
     total_members = len(members)
     upcoming_events = Event.query.filter(Event.event_date >= datetime.utcnow().date()).count()
-    submission_count = Submission.query.join(Member, Submission.member_id == Member.id).filter(
-        Member.id.in_([m.id for m in members])
+
+    submission_count = Submission.query.filter(
+        Submission.member_id.in_(member_ids), Submission.status == SubmissionStatus.APPROVED
+    ).count()
+    pending_review_count = Submission.query.filter(
+        Submission.member_id.in_(member_ids), Submission.status == SubmissionStatus.PENDING
     ).count()
 
     active_now = 0
@@ -73,10 +80,9 @@ def build_summary_data(current_user):
 
     never_logged_in = [m for m in members if not m.is_active_account]
 
-    member_ids = [m.id for m in members]
-    recent_submissions = Submission.query.filter(Submission.member_id.in_(member_ids)).order_by(
-        Submission.submitted_at.desc()
-    ).limit(5).all()
+    recent_submissions = Submission.query.filter(
+        Submission.member_id.in_(member_ids), Submission.status == SubmissionStatus.APPROVED
+    ).order_by(Submission.submitted_at.desc()).limit(5).all()
 
     section_comparison = None
     if current_user.role in VIEW_ALL_ROLES:
@@ -94,16 +100,32 @@ def build_summary_data(current_user):
     attended = sum(1 for a in all_attendance if a.present)
     overall_attendance_rate = round((attended / total_marked) * 100, 1) if total_marked else None
 
+    connected_count = sum(1 for m in members if m.hackatime_connection)
+    hackatime_adoption_pct = round((connected_count / total_members) * 100, 1) if total_members else 0
+    disabled_count = sum(1 for m in members if m.is_disabled)
+    featured_count = Submission.query.filter(
+        Submission.member_id.in_(member_ids), Submission.is_featured == True
+    ).count()
+    next_event = Event.query.filter(Event.event_date >= datetime.utcnow().date()).order_by(Event.event_date).first()
+    days_to_next_event = (next_event.event_date - datetime.utcnow().date()).days if next_event else None
+
     return {
         "total_members": total_members,
         "upcoming_events": upcoming_events,
         "submission_count": submission_count,
+        "pending_review_count": pending_review_count,
         "active_now": active_now,
         "top_contributors": top_contributors,
         "never_logged_in": never_logged_in,
         "recent_submissions": recent_submissions,
         "section_comparison": section_comparison,
         "overall_attendance_rate": overall_attendance_rate,
+        "connected_count": connected_count,
+        "hackatime_adoption_pct": hackatime_adoption_pct,
+        "disabled_count": disabled_count,
+        "featured_count": featured_count,
+        "next_event": next_event,
+        "days_to_next_event": days_to_next_event,
     }
 
 @admin_bp.route("/summary")

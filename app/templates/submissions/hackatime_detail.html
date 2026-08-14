@@ -1,22 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Hackatime Detail - PCES{% endblock %}
-{% block page_title %}Hackatime detail: {{ submission.title }}{% endblock %}
+{% block page_title %}Hackatime detail{% endblock %}
 {% block content %}
+
 <div class="card">
-  <p>Member: <strong>{{ submission.member.name }}</strong></p>
+  <div class="card-head"><span class="card-icon" style="background:var(--hc-red);">⚡</span><h2>{{ submission.title }}</h2></div>
+  <p class="form-static">Member: {{ submission.member.name }}</p>
 
   {% if project is none %}
-  <p>No Hackatime data is available for this submission (member not connected, or project not found).</p>
+  <p style="margin-top:14px;">No Hackatime data available for this submission (not connected, or project not found).</p>
   {% else %}
-  <p>Project: {{ project.name }}</p>
-  <p>Total time: {{ (project.total_seconds / 3600) | round(1) }} hours</p>
-  <p>Languages: {{ project.languages | join(', ') }}</p>
-  <p>Last active: {{ project.most_recent_heartbeat }}</p>
-  <p>Archived: {{ 'Yes' if project.archived else 'No' }}</p>
-  {% endif %}
-
-  <div class="form-actions">
-    <a href="{{ url_for('submissions.all_submissions') }}" class="btn">Back to all submissions</a>
+  <div class="hd-stat-row">
+    <div class="stat-card"><span class="stat-value">{{ (project.total_seconds / 3600) | round(1) }}</span><span class="stat-label">Total hours</span></div>
+    <div class="stat-card"><span class="stat-value">{{ 'Yes' if project.archived else 'No' }}</span><span class="stat-label">Archived</span></div>
   </div>
+  <p class="form-static" style="margin-bottom:8px;">Languages</p>
+  <div class="lang-badges">
+    {% for l in project.languages %}<span class="badge">{{ l }}</span>{% endfor %}
+  </div>
+  <p class="form-static" style="margin-top:14px;">Last active: {{ project.most_recent_heartbeat }}</p>
+  {% endif %}
 </div>
+
+<a href="{{ url_for('submissions.all_submissions') }}" class="btn" style="margin-top:14px;">Back to all submissions</a>
 {% endblock %}

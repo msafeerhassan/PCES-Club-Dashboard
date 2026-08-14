@@ -1,27 +1,29 @@
 {% extends "base.html" %}
-{% block title %}Feature Submission - PCES{% endblock %}
-{% block page_title %}Feature: {{ submission.title }}{% endblock %}
+{% block title %}Feature: {{ submission.title }}{% endblock %}
+{% block page_title %}Feature project{% endblock %}
 {% block content %}
-{% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
 
-{% if submission.screenshots %}
-<div class="card">
-  <h2>Existing screenshots</h2>
-  <div class="media-grid">
-    {% for s in submission.screenshots %}
-    <img src="{{ s.image_url }}" class="screenshot-thumb" alt="{{ submission.title }} screenshot">
-    {% endfor %}
+<div class="form-panel">
+  <h2 style="margin-top:0;">{{ submission.title }}</h2>
+  {% if error %}<p style="color:var(--hc-red); font-weight:700; margin-bottom:14px;">{{ error }}</p>{% endif %}
+
+  {% if submission.screenshots %}
+  <p class="form-static" style="margin-bottom:10px;">Existing screenshots</p>
+  <div class="screenshot-grid">
+    {% for s in submission.screenshots %}<img src="{{ s.image_url }}" alt="screenshot">{% endfor %}
   </div>
+  {% endif %}
+
+  <form method="POST" enctype="multipart/form-data" class="form-card">
+    <label>Add screenshot(s) — required if none exist yet
+      <div class="file-input-wrap">
+        <input type="file" name="screenshots" multiple accept="image/*">
+      </div>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Feature this project</button>
+      <a href="{{ url_for('submissions.all_submissions') }}" class="btn">Cancel</a>
+    </div>
+  </form>
 </div>
-{% endif %}
-
-<form method="POST" enctype="multipart/form-data" class="card form-card">
-  <label>Add screenshot(s) — required if none exist yet
-    <input type="file" name="screenshots" multiple accept="image/*">
-  </label>
-  <div class="form-actions">
-    <button type="submit" class="btn btn-primary">Feature this project</button>
-    <a href="{{ url_for('submissions.all_submissions') }}" class="btn">Cancel</a>
-  </div>
-</form>
 {% endblock %}

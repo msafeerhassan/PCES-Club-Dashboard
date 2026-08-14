@@ -2,7 +2,6 @@ from flask import Blueprint, render_template
 from app.models.member import Member
 from app.models.event import Event
 from app.models.submission import Submission
-from app.models.gallery_photo import GalleryPhoto
 from app.models.enums import RoleEnum
 
 main_bp = Blueprint("main", __name__)
@@ -23,7 +22,6 @@ def home():
         if s.screenshots
     ][:6]
 
-    gallery_preview = GalleryPhoto.query.order_by(GalleryPhoto.uploaded_at.desc()).limit(6).all()
 
     return render_template(
         "main/home.html",
@@ -32,5 +30,4 @@ def home():
         total_submissions=total_submissions,
         leadership=leadership,
         featured_projects=featured_projects,
-        gallery_preview=gallery_preview,
     )

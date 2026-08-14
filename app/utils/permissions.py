@@ -85,3 +85,13 @@ def can_manage_event(actor, event):
     if event.scope == EventScopeEnum.CLUB_WIDE:
         return actor.role == RoleEnum.PRESIDENT
     return can_manage_section(actor, SectionEnum(event.scope.value))
+
+def can_review_submission(actor, submission):
+    if actor.role == RoleEnum.FACULTY_ADVISOR:
+        return False
+    if actor.role == RoleEnum.PRESIDENT:
+        return True
+    member_section = submission.member.section
+    if member_section is None:
+        return False
+    return can_manage_section(actor, member_section)

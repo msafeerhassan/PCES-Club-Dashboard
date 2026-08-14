@@ -75,7 +75,7 @@
     </div>
     {% endif %}
 
-    <div class="card" style="height: 330px;">
+    <div class="card">
       <div class="card-head"><span class="card-icon" style="background:var(--hc-red);">⚡</span><h2>Hackatime</h2></div>
       {% if hackatime_connected %}
       <p>Connected · <strong>{{ (recent_seconds / 3600) | round(1) if recent_seconds is not none else 'unavailable' }} hours</strong> in the last 7 days</p>

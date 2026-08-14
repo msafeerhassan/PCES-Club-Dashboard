@@ -2,48 +2,158 @@
 {% block title %}Admin Summary - PCES{% endblock %}
 {% block page_title %}Admin Summary{% endblock %}
 {% block content %}
-<div class="stat-grid">
-  <div class="stat-card"><span class="stat-value">{{ total_members }}</span><span class="stat-label">Total members</span></div>
-  <div class="stat-card"><span class="stat-value">{{ upcoming_events }}</span><span class="stat-label">Upcoming events</span></div>
-  <div class="stat-card"><span class="stat-value">{{ submission_count }}</span><span class="stat-label">Submissions received</span></div>
-  <div class="stat-card"><span class="stat-value">{{ active_now }}</span><span class="stat-label">Active coding now</span></div>
-  <div class="stat-card"><span class="stat-value">{{ overall_attendance_rate if overall_attendance_rate is not none else '-' }}{{ '%' if overall_attendance_rate is not none else '' }}</span><span class="stat-label">Overall attendance rate</span></div>
+
+{% if pending_review_count %}
+<div class="next-event-spotlight" style="border-left:3px solid var(--hc-orange);">
+  <div class="next-event-countdown" style="background: linear-gradient(120deg, var(--hc-orange), var(--hc-red));">
+    <strong>{{ pending_review_count }}</strong>
+    <span>pending</span>
+  </div>
+  <div>
+    <div class="next-event-info-title">Submissions awaiting review</div>
+    <div class="next-event-info-meta"><a href="{{ url_for('submissions.all_submissions') }}?status=pending">Review now →</a></div>
+  </div>
+</div>
+{% endif %}
+
+{% if next_event %}
+<div class="next-event-spotlight">
+  <div class="next-event-countdown">
+    <strong>{{ days_to_next_event }}</strong>
+    <span>day{{ 's' if days_to_next_event != 1 else '' }}</span>
+  </div>
+  <div>
+    <div class="next-event-info-title">Next up: {{ next_event.title }}</div>
+    <div class="next-event-info-meta">{{ next_event.event_date.strftime('%B %d, %Y') }} · {{ next_event.scope.value.replace('_', ' ')|title }}</div>
+  </div>
+</div>
+{% endif %}
+
+<div class="summary-stat-grid">
+  <div class="summary-stat-card">
+    <span class="summary-stat-icon"><svg class="kpi-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg></span>
+    <span class="summary-stat-value">{{ total_members }}</span>
+    <span class="summary-stat-label">Total members</span>
+  </div>
+  <div class="summary-stat-card">
+    <span class="summary-stat-icon"><svg class="kpi-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span>
+    <span class="summary-stat-value">{{ upcoming_events }}</span>
+    <span class="summary-stat-label">Upcoming events</span>
+  </div>
+  <div class="summary-stat-card">
+    <span class="summary-stat-icon"><svg class="kpi-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
+    <span class="summary-stat-value">{{ submission_count }}</span>
+    <span class="summary-stat-label">Submissions received</span>
+  </div>
+  <div class="summary-stat-card">
+    <span class="summary-stat-icon"><svg class="kpi-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg></span>
+    <span class="summary-stat-value">{{ active_now }}</span>
+    <span class="summary-stat-label">Active coding now</span>
+  </div>
+  <div class="summary-stat-card">
+    <span class="summary-stat-icon"><svg class="kpi-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></span>
+    <span class="summary-stat-value">{{ overall_attendance_rate if overall_attendance_rate is not none else '-' }}{{ '%' if overall_attendance_rate is not none else '' }}</span>
+    <span class="summary-stat-label">Attendance rate</span>
+  </div>
 </div>
 
-<h2>Top contributors</h2>
-<table class="data-table">
-  <tr><th>Member</th><th>Hours</th></tr>
-  {% for m, hours in top_contributors %}
-  <tr><td>{{ m.name }}</td><td>{{ hours }}</td></tr>
-  {% endfor %}
-</table>
+<div class="health-grid">
+  <div class="health-card">
+    <div class="health-card-label">Hackatime adoption</div>
+    <div class="adoption-bar-track"><div class="adoption-bar-fill" style="width: {{ hackatime_adoption_pct }}%;"></div></div>
+    <div class="health-card-value">{{ hackatime_adoption_pct }}%</div>
+    <div class="health-card-sub">{{ connected_count }} of {{ total_members }} connected</div>
+  </div>
+  <div class="health-card">
+    <div class="health-card-label">Featured projects</div>
+    <div class="health-card-value">{{ featured_count }}</div>
+    <div class="health-card-sub">shown on public homepage</div>
+  </div>
+  <div class="health-card">
+    <div class="health-card-label">Disabled accounts</div>
+    <div class="health-card-value">{{ disabled_count }}</div>
+    <div class="health-card-sub">{{ 'no issues' if disabled_count == 0 else 'review in Members' }}</div>
+  </div>
+</div>
 
-{% if section_comparison %}
-<h2>Section comparison</h2>
-<table class="data-table">
-  <tr><th>Section</th><th>Members</th><th>Total hours</th></tr>
-  <tr><td>Boys</td><td>{{ section_comparison.boys_count }}</td><td>{{ section_comparison.boys_hours }}</td></tr>
-  <tr><td>Girls</td><td>{{ section_comparison.girls_count }}</td><td>{{ section_comparison.girls_hours }}</td></tr>
-</table>
-{% endif %}
+<div class="dash-grid">
+  <div>
+    <div class="card">
+      <div class="card-head"><span class="card-icon" style="background:var(--hc-red);">▲</span><h2>Top contributors</h2></div>
+      {% if top_contributors %}
+      {% set max_hours = (top_contributors | map(attribute=1) | max) or 1 %}
+      <div class="rank-list">
+        {% for m, hours in top_contributors %}
+        <div class="rank-row">
+          <span class="rank-badge">{{ loop.index }}</span>
+          <span class="rank-name">{{ m.name }}</span>
+          <div class="rank-bar-track"><div class="rank-bar-fill" style="width: {{ (hours / max_hours * 100) if max_hours else 0 }}%;"></div></div>
+          <span class="rank-hours">{{ hours }}h</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p style="color:var(--muted); font-size:14px;">No contributor data yet.</p>
+      {% endif %}
+    </div>
 
-<h2>Recent submissions</h2>
-<table class="data-table">
-  <tr><th>Member</th><th>Title</th><th>Submitted</th></tr>
-  {% for s in recent_submissions %}
-  <tr><td>{{ s.member.name }}</td><td>{{ s.title }}</td><td>{{ s.submitted_at }}</td></tr>
-  {% endfor %}
-</table>
+    {% if section_comparison %}
+    <div class="card">
+      <div class="card-head"><span class="card-icon" style="background:var(--hc-red);">◐</span><h2>Section comparison</h2></div>
+      {% set total_sc = section_comparison.boys_hours + section_comparison.girls_hours %}
+      {% set boys_pct = (section_comparison.boys_hours / total_sc * 100) if total_sc else 50 %}
+      <div class="split-bar">
+        <div class="split-bar-boys" style="width: {{ boys_pct }}%;"></div>
+        <div class="split-bar-girls" style="width: {{ 100 - boys_pct }}%;"></div>
+      </div>
+      <div class="split-bar-caption"><span>Boys {{ section_comparison.boys_hours }}h</span><span>Girls {{ section_comparison.girls_hours }}h</span></div>
 
-<h2>Never logged in</h2>
-{% if never_logged_in %}
-<table class="data-table">
-  <tr><th>Name</th><th>Email</th><th>Invited</th></tr>
-  {% for m in never_logged_in %}
-  <tr><td>{{ m.name }}</td><td>{{ m.email }}</td><td>{{ m.created_at.strftime('%Y-%m-%d') }}</td></tr>
-  {% endfor %}
-</table>
-{% else %}
-<p>Everyone has logged in at least once.</p>
-{% endif %}
+      <div class="section-compare" style="margin-top:18px;">
+        <div class="section-compare-card sc-boys">
+          <div class="sc-label">Boys</div>
+          <div class="sc-hours">{{ section_comparison.boys_count }}</div>
+          <div class="sc-meta">members · {{ section_comparison.boys_hours }}h total</div>
+        </div>
+        <div class="section-compare-card sc-girls">
+          <div class="sc-label">Girls</div>
+          <div class="sc-hours">{{ section_comparison.girls_count }}</div>
+          <div class="sc-meta">members · {{ section_comparison.girls_hours }}h total</div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-head"><span class="card-icon" style="background:var(--hc-red);">◆</span><h2>Recent submissions</h2></div>
+      {% if recent_submissions %}
+      <div class="feed-list">
+        {% for s in recent_submissions %}
+        <div class="feed-row">
+          <span class="member-avatar">{{ s.member.name[0] }}</span>
+          <span class="feed-title">{{ s.member.name }} — {{ s.title }}</span>
+          <span class="feed-time">{{ s.submitted_at.strftime('%b %d') }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p style="color:var(--muted); font-size:14px;">No submissions yet.</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="card-icon" style="background:var(--hc-orange);">!</span><h2>Never logged in</h2></div>
+      {% if never_logged_in %}
+      <div class="warn-list">
+        {% for m in never_logged_in %}
+        <div class="warn-row"><span class="warn-dot"></span> {{ m.name }} <span style="color:var(--muted);">· invited {{ m.created_at.strftime('%b %d') }}</span></div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p style="color:var(--muted); font-size:14px;">Everyone has logged in at least once.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
 {% endblock %}

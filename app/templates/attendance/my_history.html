@@ -2,14 +2,23 @@
 {% block title %}My Attendance - PCES{% endblock %}
 {% block page_title %}My attendance{% endblock %}
 {% block content %}
-<table class="data-table">
-  <tr><th>Event</th><th>Date</th><th>Present</th></tr>
-  {% for r in records %}
-  <tr>
-    <td>{{ r.event.title }}</td>
-    <td>{{ r.event.event_date }}</td>
-    <td>{{ 'Yes' if r.present else 'No' }}</td>
-  </tr>
-  {% endfor %}
-</table>
+
+{% set attended_count = records | selectattr('present') | list | length %}
+<div class="attendance-summary">
+  <span>Attendance rate</span>
+  <strong>{{ ((attended_count / records|length * 100) | round(1)) if records|length else 0 }}%</strong>
+</div>
+
+<div class="data-table-wrap">
+  <table class="data-table">
+    <tr><th>Event</th><th>Date</th><th>Status</th></tr>
+    {% for r in records %}
+    <tr>
+      <td>{{ r.event.title }}</td>
+      <td>{{ r.event.event_date }}</td>
+      <td>{% if r.present %}<span class="badge badge-success">Present</span>{% else %}<span class="badge badge-danger">Absent</span>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
 {% endblock %}

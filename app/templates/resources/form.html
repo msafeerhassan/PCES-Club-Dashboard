@@ -2,14 +2,16 @@
 {% block title %}Add Resource - PCES{% endblock %}
 {% block page_title %}Add resource{% endblock %}
 {% block content %}
-<form method="POST" class="card form-card">
-  <label>Title <input type="text" name="title" required></label>
-  <label>URL <input type="url" name="url" required></label>
-  <label>Category (optional) <input type="text" name="category" placeholder="e.g. Git, Web Dev, Design"></label>
-  <label>Description (optional) <textarea name="description"></textarea></label>
-  <div class="form-actions">
-    <button type="submit" class="btn btn-primary">Add</button>
-    <a href="{{ url_for('resources.list_resources') }}" class="btn">Cancel</a>
+<form method="POST" class="form-panel">
+  <div class="form-card">
+    <label>Title <input type="text" name="title" required></label>
+    <label>URL <input type="url" name="url" required></label>
+    <label>Category (optional) <input type="text" name="category" placeholder="e.g. Git, Web Dev, Design"></label>
+    <label>Description (optional) <textarea name="description"></textarea></label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Add resource</button>
+      <a href="{{ url_for('resources.list_resources') }}" class="btn">Cancel</a>
+    </div>
   </div>
 </form>
 {% endblock %}

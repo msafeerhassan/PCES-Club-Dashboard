@@ -49,11 +49,11 @@ def my_activity():
 @activity_bp.route("/admin")
 @login_required
 def admin_list():
+    from app.models.enums import RoleEnum
+
     sections = visible_sections(current_user)
     if not sections:
         abort(403)
-
-    from app.models.enums import RoleEnum
 
     if current_user.role in VIEW_ALL_ROLES:
         members = Member.query.filter(Member.role == RoleEnum.MEMBER).all()
@@ -64,15 +64,17 @@ def admin_list():
     for m in members:
         connection = m.hackatime_connection
         if connection is None:
-            rows.append({"member": m, "connected": False, "hours": None, "active": False})
+            rows.append({"member": m, "connected": False, "hours": None, "active": False, "streak": None})
             continue
         hours = get_hours(oauth, connection)
         active, _ = get_active_now(oauth, connection)
+        streak = get_streak(oauth, connection)
         rows.append({
             "member": m,
             "connected": True,
             "hours": round(hours["total_seconds"] / 3600, 1) if hours else None,
             "active": active,
+            "streak": streak.get("streak_days") if streak else None,
         })
 
     return render_template("activity/admin_list.html", rows=rows)

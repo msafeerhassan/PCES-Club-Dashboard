@@ -32,7 +32,6 @@ def create_app():
     from app.routes.activity import activity_bp
     from app.routes.reports import reports_bp
     from app.routes.profile import profile_bp
-    from app.routes.gallery import gallery_bp
     from app.routes.announcements import announcements_bp
     from app.routes.resources import resources_bp
 
@@ -47,7 +46,6 @@ def create_app():
     app.register_blueprint(activity_bp)
     app.register_blueprint(reports_bp)
     app.register_blueprint(profile_bp)
-    app.register_blueprint(gallery_bp)
     app.register_blueprint(announcements_bp)
     app.register_blueprint(resources_bp)
 

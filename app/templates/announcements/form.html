@@ -2,12 +2,14 @@
 {% block title %}New Announcement - PCES{% endblock %}
 {% block page_title %}New announcement{% endblock %}
 {% block content %}
-<form method="POST" class="card form-card">
-  <label>Title <input type="text" name="title" required></label>
-  <label>Body <textarea name="body" required></textarea></label>
-  <div class="form-actions">
-    <button type="submit" class="btn btn-primary">Post</button>
-    <a href="{{ url_for('announcements.list_announcements') }}" class="btn">Cancel</a>
+<form method="POST" class="form-panel">
+  <div class="form-card">
+    <label>Title <input type="text" name="title" required></label>
+    <label>Body <textarea name="body" required></textarea></label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Post announcement</button>
+      <a href="{{ url_for('announcements.list_announcements') }}" class="btn">Cancel</a>
+    </div>
   </div>
 </form>
 {% endblock %}

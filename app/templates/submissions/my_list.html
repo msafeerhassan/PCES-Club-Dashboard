@@ -2,22 +2,44 @@
 {% block title %}My Submissions - PCES{% endblock %}
 {% block page_title %}My submissions{% endblock %}
 {% block content %}
-<a href="{{ url_for('submissions.new_submission') }}" class="btn btn-primary">Submit new project</a>
-<table class="data-table">
-<tr><th>Title</th><th>Event</th><th>Links</th><th>Hackatime project</th><th>Submitted</th><th>Status</th></tr>
+
+<div class="events-toolbar">
+  <span style="color:var(--muted); font-size:14px;">{{ submissions | length }} submission{{ 's' if submissions | length != 1 else '' }}</span>
+  <a href="{{ url_for('submissions.new_submission') }}" class="btn btn-primary">Submit new project</a>
+</div>
+
+{% if submissions %}
+<div class="submission-grid">
   {% for s in submissions %}
-  <tr>
-    <td>{{ s.title }}</td>
-    <td>{{ s.event.title if s.event else 'Standalone' }}</td>
-    <td>
-      {% if s.demo_url %}<a href="{{ s.demo_url }}" target="_blank">Demo</a>{% endif %}
-      {% if s.github_url %}<a href="{{ s.github_url }}" target="_blank">GitHub</a>{% endif %}
-{% for f in s.files %}<a href="{{ f.file_url }}" target="_blank">{{ f.file_name }}</a>{% endfor %}
-    </td>
-    <td>{{ s.hackatime_project_name or '-' }}</td>
-    <td>{{ s.submitted_at }}</td>
-    <td>{% if s.is_late %}<span class="badge badge-danger">LATE</span>{% elif s.event %}<span class="badge badge-success">On time</span>{% else %}-{% endif %}</td>
-  </tr>
+  <div class="submission-card">
+    <span class="submission-card-title">{{ s.title }}</span>
+    <span class="submission-card-meta">{{ s.event.title if s.event else 'Standalone' }} · {{ s.submitted_at.strftime('%b %d, %Y') }}</span>
+<div class="submission-card-badges">
+{% if s.status.value == 'pending' %}<span class="badge badge-warning">Pending review</span>
+      {% elif s.status.value == 'approved' %}<span class="badge badge-success">Approved</span>
+      {% elif s.status.value == 'rejected' %}<span class="badge badge-danger">Needs changes</span>
+      {% endif %}
+      {% if s.is_late %}<span class="badge badge-danger">Late</span>
+      {% elif s.event %}<span class="badge badge-success">On time</span>
+      {% endif %}
+      {% if s.hackatime_project_name %}<span class="badge">{{ s.hackatime_project_name }}</span>{% endif %}
+    </div>
+    {% if s.status.value == 'rejected' %}
+    {% if s.feedback %}<p style="font-size:12.5px; color:var(--hc-red); margin-top:-4px;">{{ s.feedback }}</p>{% endif %}
+    <a href="{{ url_for('submissions.edit_submission', submission_id=s.id) }}" class="btn btn-small" style="width:fit-content;">Fix & resubmit</a>
+    {% endif %}
+    <div class="submission-card-links">
+      {% if s.demo_url %}<a href="{{ s.demo_url }}" target="_blank" rel="noopener noreferrer">Demo</a>{% endif %}
+      {% if s.github_url %}<a href="{{ s.github_url }}" target="_blank" rel="noopener noreferrer">GitHub</a>{% endif %}
+      {% for f in s.files %}<a href="{{ f.file_url }}" target="_blank" rel="noopener noreferrer">{{ f.file_name }}</a>{% endfor %}
+    </div>
+  </div>
   {% endfor %}
-</table>
+</div>
+{% else %}
+<div class="empty-state-card">
+  <h3>No submissions yet</h3>
+  <p>Submit your first project to see it here.</p>
+</div>
+{% endif %}
 {% endblock %}

@@ -23,35 +23,79 @@
         </a>
       </div>
       <nav class="sidebar-nav">
-        <a href="{{ url_for('dashboard.index') }}" class="nav-link">Dashboard</a>
-        <a href="{{ url_for('events.list_events') }}" class="nav-link">Events</a>
-        <a href="{{ url_for('submissions.my_submissions') }}" class="nav-link">My Submissions</a>
-        <a href="{{ url_for('attendance.my_attendance') }}" class="nav-link">My Attendance</a>
-        <a href="{{ url_for('activity.my_activity') }}" class="nav-link">My Activity</a>
-        <a href="{{ url_for('resources.list_resources') }}" class="nav-link">Resources</a>
-        <a href="{{ url_for('announcements.list_announcements') }}" class="nav-link">Announcements</a>
-        <a href="{{ url_for('profile.view_profile') }}" class="nav-link">Profile</a>
+        <a href="{{ url_for('dashboard.index') }}" class="nav-link {{ 'is-active' if request.endpoint == 'dashboard.index' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+          Dashboard
+        </a>
+        <a href="{{ url_for('events.list_events') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('events.') else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+          Events
+        </a>
+        <a href="{{ url_for('submissions.my_submissions') }}" class="nav-link {{ 'is-active' if request.endpoint in ['submissions.my_submissions', 'submissions.new_submission'] else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          My Submissions
+        </a>
+        <a href="{{ url_for('attendance.my_attendance') }}" class="nav-link {{ 'is-active' if request.endpoint == 'attendance.my_attendance' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M20 6 9 17l-5-5"/></svg>
+          My Attendance
+        </a>
+        <a href="{{ url_for('activity.my_activity') }}" class="nav-link {{ 'is-active' if request.endpoint == 'activity.my_activity' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+          My Activity
+        </a>
+        <a href="{{ url_for('resources.list_resources') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('resources.') else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M4 19V5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2zM4 19a2 2 0 0 0 2 2h13"/></svg>
+          Resources
+        </a>
+        <a href="{{ url_for('announcements.list_announcements') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('announcements.') else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M3 11v2a2 2 0 0 0 2 2h1l4 4V7L6 11H5a2 2 0 0 0-2 2z"/><path d="M15 8a4 4 0 0 1 0 8"/></svg>
+          Announcements
+        </a>
+        <a href="{{ url_for('profile.view_profile') }}" class="nav-link {{ 'is-active' if request.endpoint == 'profile.view_profile' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>
+          Profile
+        </a>
 
         {% set is_admin_role = current_user.role.value in ['president', 'vp_boys', 'vp_girls'] %}
         {% set is_view_role = current_user.role.value in ['president', 'vp_boys', 'vp_girls', 'faculty_advisor'] %}
         {% if is_view_role %}
         <div class="sidebar-label">Admin</div>
-        <a href="{{ url_for('admin.summary') }}" class="nav-link">Summary</a>
+        <a href="{{ url_for('admin.summary') }}" class="nav-link {{ 'is-active' if request.endpoint == 'admin.summary' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+          Summary
+        </a>
         {% if is_admin_role %}
-        <a href="{{ url_for('admin.members_list') }}" class="nav-link">Members</a>
+        <a href="{{ url_for('admin.members_list') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('admin.member') else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3 3-5 7-5s7 2 7 5"/><circle cx="18" cy="8" r="2.5"/><path d="M15 14c2.5.3 4.5 2 4.5 4.5"/></svg>
+          Members
+        </a>
         {% endif %}
-        <a href="{{ url_for('submissions.all_submissions') }}" class="nav-link">All Submissions</a>
-        <a href="{{ url_for('activity.admin_list') }}" class="nav-link">Member Activity</a>
-        {% if is_admin_role %}
-        <a href="{{ url_for('gallery.manage') }}" class="nav-link">Manage Gallery</a>
-        {% endif %}
-        <a href="{{ url_for('reports.export_csv') }}" class="nav-link">Export CSV</a>
+        <a href="{{ url_for('submissions.all_submissions') }}" class="nav-link {{ 'is-active' if request.endpoint == 'submissions.all_submissions' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>
+          All Submissions
+        </a>
+        <a href="{{ url_for('activity.admin_list') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('activity.admin') else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M3 17l5-5 4 4 8-9"/></svg>
+          Member Activity
+        </a>
+        <a href="{{ url_for('reports.export_csv') }}" class="nav-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
+          Export CSV
+        </a>
         {% endif %}
       </nav>
       <div class="sidebar-footer">
-        <span class="sidebar-user">{{ current_user.name }}</span>
-        <button class="theme-toggle" onclick="toggleTheme()">Toggle theme</button>
-        <a href="{{ url_for('auth.logout') }}" class="nav-link logout">Log out</a>
+        <div class="sidebar-footer-user">
+          <span class="sidebar-footer-avatar">{{ current_user.name[0] }}</span>
+          <div>
+            <div style="font-size:13px; font-weight:700; color:var(--ink);">{{ current_user.name.split(' ')[0] }}</div>
+            <div style="font-size:11px; color:var(--muted);">{{ current_user.role.value.replace('_',' ')|title }}</div>
+          </div>
+        </div>
+        <div class="sidebar-footer-actions">
+          <button class="theme-toggle" onclick="toggleTheme()">Theme</button>
+          <a href="{{ url_for('auth.logout') }}" class="logout-btn">Log out</a>
+        </div>
       </div>
     </aside>
     <main class="content">

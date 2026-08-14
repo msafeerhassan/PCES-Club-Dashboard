@@ -18,3 +18,8 @@ class EventScopeEnum(enum.Enum):
     CLUB_WIDE = "club_wide"
     BOYS = "boys"
     GIRLS = "girls"
+
+class SubmissionStatus(enum.Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"

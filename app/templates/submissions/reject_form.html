@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Reject Submission - PCES{% endblock %}
+{% block page_title %}Reject submission{% endblock %}
+{% block content %}
+
+<div class="form-panel">
+  <div class="card-head" style="margin-bottom:14px;">
+    <span class="card-icon" style="background:var(--hc-red);">✕</span>
+    <h2 style="margin:0;">Reject "{{ submission.title }}"</h2>
+  </div>
+  <p style="color:var(--muted); font-size:13.5px; margin-bottom:18px;">The member will see this feedback and can fix and resubmit.</p>
+  {% if error %}<p style="color:var(--hc-red); font-weight:700; margin-bottom:14px;">{{ error }}</p>{% endif %}
+
+  <form method="POST" class="form-card">
+    <label>Feedback (required)
+      <textarea name="feedback" required></textarea>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Reject with feedback</button>
+      <a href="{{ url_for('submissions.all_submissions') }}" class="btn">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

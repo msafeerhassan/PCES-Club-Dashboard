@@ -2,6 +2,7 @@
 {% block title %}Members - PCES{% endblock %}
 {% block page_title %}Members{% endblock %}
 {% block content %}
+
 <div class="toolbar">
   <a href="{{ url_for('admin.member_new') }}" class="btn btn-primary">Add member</a>
   <form method="GET" class="search-form">
@@ -9,32 +10,44 @@
     <button type="submit" class="btn">Search</button>
   </form>
 </div>
-<table class="data-table">
-<tr><th>Name</th><th>Email</th><th>Role</th><th>Section</th><th>Joined</th><th>Status</th><th>Actions</th></tr>
+
+{% if members %}
+<div class="member-grid">
   {% for m in members %}
-  <tr>
-    <td>{{ m.name }}</td>
-    <td>{{ m.email }}</td>
-    <td>{{ m.role.value }}</td>
-    <td>{{ m.section.value if m.section else '-' }}</td>
-    <td>{{ m.created_at.strftime('%Y-%m-%d') }}</td>
-    <td>
+  <div class="member-card">
+    <div class="member-card-top">
+      <span class="member-avatar-xl">{{ m.name[0] }}</span>
+      <div>
+        <div class="member-card-name">{{ m.name }}</div>
+        <div class="member-card-email">{{ m.email }}</div>
+      </div>
+    </div>
+
+    <div class="member-card-badges">
+      <span class="badge">{{ m.role.value.replace('_', ' ')|title }}</span>
+      {% if m.section %}<span class="badge {{ 'badge-blue' if m.section.value == 'boys' else 'badge-purple' }}">{{ m.section.value|title }}</span>{% endif %}
       {% if m.is_disabled %}<span class="badge badge-danger" title="{{ m.disabled_reason }}">Disabled</span>
       {% elif m.is_active_account %}<span class="badge badge-success">Active</span>
       {% else %}<span class="badge">Invited</span>
       {% endif %}
-    </td>
-    <td>
-      <a href="{{ url_for('admin.member_edit', member_id=m.id) }}">Edit</a>
+    </div>
+
+    <div class="member-card-meta">Joined {{ m.created_at.strftime('%b %d, %Y') }}</div>
+
+    <div class="member-card-actions">
+      <a href="{{ url_for('admin.member_edit', member_id=m.id) }}" class="btn btn-small">Edit</a>
       {% if m.is_disabled %}
-      <form method="POST" action="{{ url_for('admin.member_enable', member_id=m.id) }}" class="inline-form">
-        <button type="submit" class="btn btn-small">Enable</button>
+      <form method="POST" action="{{ url_for('admin.member_enable', member_id=m.id) }}" class="inline-form" style="flex:1;">
+        <button type="submit" class="btn btn-small feature-btn-on" style="width:100%;">Enable</button>
       </form>
       {% else %}
-      <a href="{{ url_for('admin.member_disable', member_id=m.id) }}" class="btn btn-small">Disable</a>
+      <a href="{{ url_for('admin.member_disable', member_id=m.id) }}" class="btn btn-small" style="flex:1; text-align:center;">Disable</a>
       {% endif %}
-    </td>
-  </tr>
+    </div>
+  </div>
   {% endfor %}
-</table>
+</div>
+{% else %}
+<div class="empty-state-card"><h3>No members found</h3></div>
+{% endif %}
 {% endblock %}

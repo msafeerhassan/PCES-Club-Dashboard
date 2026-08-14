@@ -9,6 +9,9 @@ from app.utils.permissions import visible_sections, VIEW_ALL_ROLES, can_manage_s
 from app.utils.storage import upload_submission_files
 from app.models.submission_file import SubmissionFile
 from app.models.submission_screenshot import SubmissionScreenshot
+from app.models.enums import SubmissionStatus
+from app.utils.permissions import can_review_submission
+from datetime import datetime, date
 
 submissions_bp = Blueprint("submissions", __name__, url_prefix="/submissions")
 
@@ -103,11 +106,12 @@ def all_submissions():
             section_enum = None
         if section_enum is not None:
             query = query.filter(Member.section == section_enum)
+    status_filter = request.args.get("status", "").strip()
+    if status_filter:
+        query = query.filter(Submission.status == SubmissionStatus(status_filter))
 
     subs = query.order_by(Submission.submitted_at.desc()).all()
-    return render_template(
-        "submissions/admin_list.html", submissions=subs, search=search, section_filter=section_filter
-    )
+    return render_template("submissions/admin_list.html", submissions=subs, search=search, section_filter=section_filter, status_filter=status_filter)
 
 @submissions_bp.route("/<int:submission_id>/hackatime")
 @login_required
@@ -146,6 +150,12 @@ def feature_submission(submission_id):
         if member_section is None or not can_manage_section(current_user, member_section):
             abort(403)
 
+    if submission.status != SubmissionStatus.APPROVED:
+        return render_template(
+            "submissions/feature_form.html", submission=submission,
+            error="Only approved submissions can be featured. Review and approve it first."
+        )
+
     if request.method == "POST":
         uploaded = upload_submission_files(current_app, request.files.getlist("screenshots"))
         for url, _ in uploaded:
@@ -183,3 +193,73 @@ def unfeature_submission(submission_id):
     submission.is_featured = False
     db.session.commit()
     return redirect(url_for("submissions.all_submissions"))
+
+
+@submissions_bp.route("/<int:submission_id>/approve", methods=["POST"])
+@login_required
+def approve_submission(submission_id):
+    submission = Submission.query.get_or_404(submission_id)
+    if not can_review_submission(current_user, submission):
+        abort(403)
+
+    submission.status = SubmissionStatus.APPROVED
+    submission.reviewed_by_id = current_user.id
+    submission.reviewed_at = datetime.utcnow()
+    db.session.commit()
+    return redirect(url_for("submissions.all_submissions"))
+
+
+@submissions_bp.route("/<int:submission_id>/reject", methods=["GET", "POST"])
+@login_required
+def reject_submission(submission_id):
+    submission = Submission.query.get_or_404(submission_id)
+    if not can_review_submission(current_user, submission):
+        abort(403)
+
+    if request.method == "POST":
+        feedback = request.form.get("feedback", "").strip()
+        if not feedback:
+            return render_template("submissions/reject_form.html", submission=submission, error="Feedback is required so the member knows what to fix.")
+
+        submission.status = SubmissionStatus.REJECTED
+        submission.reviewed_by_id = current_user.id
+        submission.reviewed_at = datetime.utcnow()
+        submission.feedback = feedback
+        submission.is_featured = False
+        db.session.commit()
+        return redirect(url_for("submissions.all_submissions"))
+
+    return render_template("submissions/reject_form.html", submission=submission, error=None)
+
+
+@submissions_bp.route("/<int:submission_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_submission(submission_id):
+    submission = Submission.query.get_or_404(submission_id)
+    if submission.member_id != current_user.id:
+        abort(403)
+    if submission.status != SubmissionStatus.REJECTED:
+        abort(403)
+
+    connection = current_user.hackatime_connection
+    hackatime_projects = []
+    if connection:
+        resp = oauth.hackatime.get("api/v1/authenticated/projects", token={"access_token": connection.access_token})
+        hackatime_projects = [p["name"] for p in resp.json().get("projects", [])] if resp.status_code == 200 else []
+
+    if request.method == "POST":
+        submission.title = request.form.get("title", "").strip()
+        submission.description = request.form.get("description", "").strip()
+        submission.hackatime_project_name = request.form.get("hackatime_project_name") or None
+        submission.demo_url = request.form.get("demo_url", "").strip() or None
+        submission.github_url = request.form.get("github_url", "").strip() or None
+
+        submission.status = SubmissionStatus.PENDING
+        submission.reviewed_by_id = None
+        submission.reviewed_at = None
+        submission.feedback = None
+
+        db.session.commit()
+        return redirect(url_for("submissions.my_submissions"))
+
+    return render_template("submissions/edit.html", submission=submission, hackatime_projects=hackatime_projects)

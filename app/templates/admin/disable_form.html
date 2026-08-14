@@ -1,15 +1,27 @@
 {% extends "base.html" %}
 {% block title %}Disable {{ member.name }} - PCES{% endblock %}
-{% block page_title %}Disable {{ member.name }}{% endblock %}
+{% block page_title %}Disable member{% endblock %}
 {% block content %}
-{% if error %}<p class="text-danger">{{ error }}</p>{% endif %}
-<form method="POST" class="card form-card">
-  <label>Reason for disabling (required)
-    <textarea name="reason" required></textarea>
-  </label>
-  <div class="form-actions">
-    <button type="submit" class="btn btn-primary">Disable member</button>
-    <a href="{{ url_for('admin.members_list') }}" class="btn">Cancel</a>
+
+<div class="form-panel">
+  <div class="card-head" style="margin-bottom:14px;">
+    <span class="card-icon" style="background:var(--hc-orange);">!</span>
+    <h2 style="margin:0;">Disable {{ member.name }}</h2>
   </div>
-</form>
+  <p style="color:var(--muted); font-size:13.5px; margin-bottom:18px;">
+    This will immediately block {{ member.name }} from logging in. A reason is required and will be visible to other admins.
+  </p>
+
+  {% if error %}<p style="color:var(--hc-red); font-weight:700; margin-bottom:14px;">{{ error }}</p>{% endif %}
+
+  <form method="POST" class="form-card">
+    <label>Reason for disabling (required)
+      <textarea name="reason" required></textarea>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" style="background-image:linear-gradient(120deg, var(--hc-orange), var(--hc-red));">Disable member</button>
+      <a href="{{ url_for('admin.members_list') }}" class="btn">Cancel</a>
+    </div>
+  </form>
+</div>
 {% endblock %}

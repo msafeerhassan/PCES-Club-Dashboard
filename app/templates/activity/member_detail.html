@@ -2,35 +2,63 @@
 {% block title %}{{ member.name }} - Activity{% endblock %}
 {% block page_title %}{{ member.name }}'s activity{% endblock %}
 {% block content %}
+
 {% if not connected %}
-<p>Not connected to Hackatime.</p>
+<div class="empty-state-card"><h3>Not connected to Hackatime</h3></div>
 {% else %}
+
 <div class="card">
-  <p>Status: {% if active %}<span class="badge badge-success">Active now</span>{% else %}<span class="badge">Not active</span>{% endif %}{% if last_seen %} (last seen {{ last_seen }}){% endif %}</p>
-  <p>Hours (last 7 days): <strong>{{ (hours.total_seconds / 3600) | round(1) if hours else 'unavailable' }}</strong></p>
-<p>Current streak: <strong>{{ streak.streak_days if streak else '-' }} days</strong></p>
-<p>Longest streak seen (since connecting): <strong>{{ longest_streak }} days</strong></p>
-<p>Weekly average: <strong>{{ (hours.total_seconds / 3600 / 7) | round(1) if hours else '-' }} hrs/day</strong> vs. peer average: <strong>{{ (club_average / 7) | round(1) if club_average else 0 }} hrs/day</strong></p>
+  {% if active %}
+  <p class="status-live"><span class="pulse-dot"></span> <strong>Active now</strong> <span style="color:var(--muted); font-size:13px;">(last seen {{ last_seen.strftime('%b %d, %H:%M') if last_seen else '' }})</span></p>
+  {% else %}
+  <p><span class="badge">Not active</span></p>
+  {% endif %}
+</div>
+
+<div class="stat-grid" style="margin-bottom:18px;">
+  <div class="stat-card"><span class="stat-value">{{ (hours.total_seconds / 3600) | round(1) if hours else '-' }}</span><span class="stat-label">Hours (7d)</span></div>
+  <div class="stat-card"><span class="stat-value">{{ streak.streak_days if streak else '-' }}</span><span class="stat-label">Current streak</span></div>
+  <div class="stat-card"><span class="stat-value">{{ longest_streak }}</span><span class="stat-label">Longest streak</span></div>
+  <div class="stat-card"><span class="stat-value">{{ (hours.total_seconds / 3600 / 7) | round(1) if hours else '-' }}</span><span class="stat-label">Their avg (hrs/day)</span></div>
+  <div class="stat-card"><span class="stat-value">{{ (club_average / 7) | round(1) if club_average else 0 }}</span><span class="stat-label">Peer avg (hrs/day)</span></div>
+</div>
+
 {% if latest_heartbeat %}
-<p>Most recently used: <strong>{{ latest_heartbeat.editor or 'unknown' }}</strong> on <strong>{{ latest_heartbeat.operating_system or 'unknown' }}</strong></p>
+<p style="color:var(--muted); font-size:14px; margin-bottom:20px;">Most recently used <strong style="color:var(--ink);">{{ latest_heartbeat.editor or 'unknown' }}</strong> on <strong style="color:var(--ink);">{{ latest_heartbeat.operating_system or 'unknown' }}</strong></p>
 {% endif %}
 
-<h2>Weekly trend</h2>
-<table class="data-table">
-  <tr>{% for d in weekly_trend %}<th>{{ d.date[5:] }}</th>{% endfor %}</tr>
-  <tr>{% for d in weekly_trend %}<td>{{ d.hours }}h</td>{% endfor %}</tr>
-</table>
+<div class="card">
+  <div class="card-head"><span class="card-icon" style="background:var(--hc-red);">⚡</span><h2>Weekly trend</h2></div>
+  {% if weekly_trend %}
+  {% set max_h = (weekly_trend | map(attribute='hours') | max) or 1 %}
+  <div class="trend-chart">
+    {% for d in weekly_trend %}
+    <div class="trend-bar-wrap">
+      <span class="trend-bar-value">{{ d.hours }}</span>
+      <div class="trend-bar" style="height: {{ ((d.hours / max_h) * 100) if max_h else 0 }}%;"></div>
+      <span class="trend-bar-label">{{ d.date[5:] }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 </div>
+
 <h2>Projects</h2>
-<table class="data-table">
-  <tr><th>Project</th><th>Hours</th><th>Languages</th></tr>
+{% if projects %}
+<div class="activity-project-grid">
   {% for p in projects %}
-  <tr>
-    <td>{{ p.name }}</td>
-    <td>{{ (p.total_seconds / 3600) | round(1) }}</td>
-    <td>{{ p.languages | join(', ') }}</td>
-  </tr>
+  <div class="activity-project-card">
+    <span class="activity-project-name">{{ p.name }}</span>
+    <div class="activity-project-hours">{{ (p.total_seconds / 3600) | round(1) }}h</div>
+    <div class="lang-badges">
+      {% for l in p.languages %}<span class="badge">{{ l }}</span>{% endfor %}
+    </div>
+  </div>
   {% endfor %}
-</table>
+</div>
+{% else %}
+<div class="empty-state-card"><h3>No project activity yet</h3></div>
+{% endif %}
+
 {% endif %}
 {% endblock %}

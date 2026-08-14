@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Edit Submission - PCES{% endblock %}
+{% block page_title %}Edit & resubmit{% endblock %}
+{% block content %}
+
+<div class="form-panel">
+  <div class="card-head" style="margin-bottom:14px;">
+    <span class="card-icon" style="background:var(--hc-red);">↺</span>
+    <h2 style="margin:0;">Fix and resubmit</h2>
+  </div>
+  {% if submission.feedback %}
+  <div class="card" style="border-left:3px solid var(--hc-red); margin-bottom:18px;">
+    <p style="font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.04em; color:var(--hc-red); margin-bottom:6px;">Reviewer feedback</p>
+    <p>{{ submission.feedback }}</p>
+  </div>
+  {% endif %}
+
+  <form method="POST" class="form-card">
+    <label>Title <input type="text" name="title" value="{{ submission.title }}" required></label>
+    <label>Description <textarea name="description">{{ submission.description or '' }}</textarea></label>
+    <div class="form-row-2">
+      <label>Demo URL <input type="url" name="demo_url" value="{{ submission.demo_url or '' }}"></label>
+      <label>GitHub URL <input type="url" name="github_url" value="{{ submission.github_url or '' }}"></label>
+    </div>
+    <label>Hackatime project
+      <select name="hackatime_project_name">
+        <option value="">-- none --</option>
+        {% for p in hackatime_projects %}
+        <option value="{{ p }}" {{ 'selected' if p == submission.hackatime_project_name else '' }}>{{ p }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Resubmit for review</button>
+      <a href="{{ url_for('submissions.my_submissions') }}" class="btn">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

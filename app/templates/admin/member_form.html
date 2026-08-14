@@ -2,35 +2,49 @@
 {% block title %}{{ 'Edit member' if member else 'Add member' }} - PCES{% endblock %}
 {% block page_title %}{{ 'Edit member' if member else 'Add member' }}{% endblock %}
 {% block content %}
-<form method="POST" class="form-card">
-  <label>Name
-    <input type="text" name="name" value="{{ member.name if member else '' }}" required>
-  </label>
-  {% if not member %}
-  <label>Email
-    <input type="email" name="email" required>
-  </label>
-  {% else %}
-  <p class="form-static">Email: {{ member.email }} (cannot be changed)</p>
-  {% endif %}
-  <label>Role
-    <select name="role">
-      {% for r in roles %}
-      <option value="{{ r.value }}" {{ 'selected' if member and member.role == r else '' }}>{{ r.value }}</option>
-      {% endfor %}
-    </select>
-  </label>
-  <label>Section
-    <select name="section">
-      <option value="">None (Club-wide role)</option>
-      {% for s in sections %}
-      <option value="{{ s.value }}" {{ 'selected' if member and member.section == s else '' }}>{{ s.value }}</option>
-      {% endfor %}
-    </select>
-  </label>
-  <div class="form-actions">
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a href="{{ url_for('admin.members_list') }}" class="btn">Cancel</a>
+
+<div class="form-panel">
+  <div class="card-head" style="margin-bottom:18px;">
+    <span class="card-icon" style="background:var(--hc-red);">{{ 'E' if member else '+' }}</span>
+    <h2 style="margin:0;">{{ 'Edit member details' if member else 'Invite a new member' }}</h2>
   </div>
-</form>
+
+  <form method="POST" class="form-card">
+    <label>Name
+      <input type="text" name="name" value="{{ member.name if member else '' }}" required>
+    </label>
+
+    {% if not member %}
+    <label>Email
+      <input type="email" name="email" required>
+    </label>
+    {% else %}
+    <p class="form-static">Email: <strong style="color:var(--ink);">{{ member.email }}</strong> (cannot be changed)</p>
+    {% endif %}
+
+    <div class="form-row-2">
+      <label>Role
+        <select name="role">
+          {% for r in roles %}
+          <option value="{{ r.value }}" {{ 'selected' if member and member.role == r else '' }}>{{ r.value.replace('_', ' ')|title }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>Section
+        <select name="section">
+          <option value="">None (club-wide role)</option>
+          {% for s in sections %}
+          <option value="{{ s.value }}" {{ 'selected' if member and member.section == s else '' }}>{{ s.value|title }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save member</button>
+      <a href="{{ url_for('admin.members_list') }}" class="btn">Cancel</a>
+    </div>
+  </form>
+</div>
 {% endblock %}

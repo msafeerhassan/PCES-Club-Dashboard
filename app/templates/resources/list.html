@@ -2,30 +2,39 @@
 {% block title %}Resources - PCES{% endblock %}
 {% block page_title %}Resources{% endblock %}
 {% block content %}
-{% if current_user.role.value in ['president', 'vp_boys', 'vp_girls'] %}
-<div class="toolbar">
-  <a href="{{ url_for('resources.new_resource') }}" class="btn btn-primary">Add resource</a>
-</div>
-{% endif %}
 
-<div class="data-table-wrap">
-  <table class="data-table">
-    <tr><th>Title</th><th>Category</th><th>Description</th><th>Link</th><th></th></tr>
-    {% for r in items %}
-    <tr>
-      <td>{{ r.title }}</td>
-      <td>{{ r.category or '-' }}</td>
-      <td>{{ r.description or '-' }}</td>
-      <td><a href="{{ r.url }}" target="_blank" rel="noopener noreferrer">Open</a></td>
-      <td>
-        {% if current_user.role.value in ['president', 'vp_boys', 'vp_girls'] %}
+{% set is_admin = current_user.role.value in ['president', 'vp_boys', 'vp_girls'] %}
+<div class="events-toolbar">
+  <span style="color:var(--muted); font-size:14px;">{{ items | length }} resource{{ 's' if items|length != 1 else '' }}</span>
+  {% if is_admin %}
+  <a href="{{ url_for('resources.new_resource') }}" class="btn btn-primary">Add resource</a>
+  {% endif %}
+</div>
+
+{% if items %}
+{% set grouped = items | groupby('category') %}
+{% for category, group_items in grouped %}
+<div class="category-section">
+  <div class="category-heading">{{ category or 'General' }}</div>
+  <div class="resource-grid">
+    {% for r in group_items %}
+    <div class="resource-card">
+      <span class="resource-card-title">{{ r.title }}</span>
+      {% if r.description %}<p class="resource-card-desc">{{ r.description }}</p>{% endif %}
+      <div class="resource-card-footer">
+        <a href="{{ r.url }}" target="_blank" rel="noopener noreferrer" class="link-chip">Open →</a>
+        {% if is_admin %}
         <form method="POST" action="{{ url_for('resources.delete_resource', resource_id=r.id) }}" class="inline-form">
           <button type="submit" class="btn btn-small">Delete</button>
         </form>
         {% endif %}
-      </td>
-    </tr>
+      </div>
+    </div>
     {% endfor %}
-  </table>
+  </div>
 </div>
+{% endfor %}
+{% else %}
+<div class="empty-state-card"><h3>No resources yet</h3><p>Links and guides added by leadership will show up here.</p></div>
+{% endif %}
 {% endblock %}

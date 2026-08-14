@@ -2,6 +2,7 @@
 {% block title %}All Submissions - PCES{% endblock %}
 {% block page_title %}All submissions{% endblock %}
 {% block content %}
+
 <form method="GET" class="search-form">
   <input type="text" name="q" placeholder="Search by member name" value="{{ search }}">
   <select name="section">
@@ -9,33 +10,70 @@
     <option value="boys" {{ 'selected' if section_filter == 'boys' else '' }}>Boys</option>
     <option value="girls" {{ 'selected' if section_filter == 'girls' else '' }}>Girls</option>
   </select>
+  <select name="status">
+    <option value="">All statuses</option>
+    <option value="pending" {{ 'selected' if status_filter == 'pending' else '' }}>Pending review</option>
+    <option value="approved" {{ 'selected' if status_filter == 'approved' else '' }}>Approved</option>
+    <option value="rejected" {{ 'selected' if status_filter == 'rejected' else '' }}>Rejected</option>
+  </select>
   <button type="submit" class="btn">Filter</button>
 </form>
-<table class="data-table">
-<tr><th>Member</th><th>Section</th><th>Title</th><th>Event</th><th>Links</th><th>Hackatime project</th><th>Submitted</th><th>Featured</th></tr>
+
+{% if submissions %}
+<div class="admin-sub-grid">
   {% for s in submissions %}
-  <tr>
-    <td>{{ s.member.name }}</td>
-    <td>{{ s.member.section.value if s.member.section else '-' }}</td>
-    <td>{{ s.title }}</td>
-    <td>{{ s.event.title if s.event else 'Standalone' }}</td>
-    <td>
-      {% if s.demo_url %}<a href="{{ s.demo_url }}" target="_blank">Demo</a>{% endif %}
-      {% if s.github_url %}<a href="{{ s.github_url }}" target="_blank">GitHub</a>{% endif %}
-{% for f in s.files %}<a href="{{ f.file_url }}" target="_blank">{{ f.file_name }}</a>{% endfor %}
-    </td>
-    <td>{{ s.hackatime_project_name or '-' }}{% if s.hackatime_project_name %} <a href="{{ url_for('submissions.hackatime_detail', submission_id=s.id) }}">(details)</a>{% endif %}</td>
-<td>{{ s.submitted_at }}</td>
-<td>
-      {% if s.is_featured %}
-      <form method="POST" action="{{ url_for('submissions.unfeature_submission', submission_id=s.id) }}" class="inline-form">
-        <button type="submit" class="btn btn-small">Unfeature</button>
-      </form>
-      {% else %}
-      <a href="{{ url_for('submissions.feature_submission', submission_id=s.id) }}" class="btn btn-small">Feature</a>
+  <div class="admin-sub-card {{ 'is-featured' if s.is_featured else '' }}">
+    {% if s.is_featured %}<span class="admin-sub-ribbon">Featured</span>{% endif %}
+
+    <div class="member-chip">
+      <span class="member-avatar">{{ s.member.name[0] }}</span>
+      <div>
+        <div style="font-weight:700; font-size:13.5px; color:var(--ink);">{{ s.member.name }}</div>
+        {% if s.member.section %}<span class="badge {{ 'badge-blue' if s.member.section.value == 'boys' else 'badge-purple' }}" style="margin-top:2px;">{{ s.member.section.value|title }}</span>{% endif %}
+      </div>
+    </div>
+
+<div class="admin-sub-title">{{ s.title }}</div>
+    <div class="admin-sub-event">{{ s.event.title if s.event else 'Standalone' }}</div>
+    <div style="margin-bottom:10px;">
+{% if s.status.value == 'pending' %}<span class="badge badge-warning">Pending review</span>
+      {% elif s.status.value == 'approved' %}<span class="badge badge-success">Approved</span>
+      {% elif s.status.value == 'rejected' %}<span class="badge badge-danger">Rejected</span>
       {% endif %}
-    </td>
-  </tr>
+    </div>
+
+    <div class="link-chips">
+      {% if s.demo_url %}<a href="{{ s.demo_url }}" target="_blank" rel="noopener noreferrer" class="link-chip">Demo</a>{% endif %}
+      {% if s.github_url %}<a href="{{ s.github_url }}" target="_blank" rel="noopener noreferrer" class="link-chip">GitHub</a>{% endif %}
+      {% for f in s.files %}<a href="{{ f.file_url }}" target="_blank" rel="noopener noreferrer" class="link-chip" title="{{ f.file_name }}">File {{ loop.index }}</a>{% endfor %}
+      {% if s.hackatime_project_name %}<a href="{{ url_for('submissions.hackatime_detail', submission_id=s.id) }}" class="link-chip">⚡ {{ s.hackatime_project_name }}</a>{% endif %}
+    </div>
+
+{% if s.status.value == 'pending' %}
+    <div class="review-actions">
+      <form method="POST" action="{{ url_for('submissions.approve_submission', submission_id=s.id) }}" class="inline-form" style="flex:1;">
+<button type="submit" class="btn btn-small btn-approve">Approve</button>
+      </form>
+      <a href="{{ url_for('submissions.reject_submission', submission_id=s.id) }}" class="btn btn-small btn-reject">Reject</a>
+    </div>
+    {% endif %}
+
+    <div class="admin-sub-footer">
+      <span class="admin-sub-date">{{ s.submitted_at.strftime('%b %d, %Y') }}</span>
+      {% if s.status.value == 'approved' %}
+        {% if s.is_featured %}
+        <form method="POST" action="{{ url_for('submissions.unfeature_submission', submission_id=s.id) }}" class="inline-form">
+          <button type="submit" class="btn btn-small feature-btn-on">Featured ✓</button>
+        </form>
+        {% else %}
+        <a href="{{ url_for('submissions.feature_submission', submission_id=s.id) }}" class="btn btn-small">Feature</a>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
   {% endfor %}
-</table>
+</div>
+{% else %}
+<div class="empty-state-card"><h3>No submissions found</h3></div>
+{% endif %}
 {% endblock %}
