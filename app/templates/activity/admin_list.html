@@ -3,6 +3,17 @@
 {% block page_title %}Member activity{% endblock %}
 {% block content %}
 
+<form method="GET" class="search-form">
+  <input type="text" name="q" placeholder="Search by member name" value="{{ search }}">
+  <select name="department">
+    <option value="">All departments</option>
+    {% for d in departments %}
+    <option value="{{ d.id }}" {{ 'selected' if dept_filter == d.id|string else '' }}>{{ d.name }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn">Filter</button>
+</form>
+
 {% if rows %}
 <div class="activity-admin-grid">
   {% for row in rows %}
@@ -12,8 +23,10 @@
         <span class="member-avatar">{{ row.member.name[0] }}</span>
         <div>
           <div style="font-weight:700; font-size:14px; color:var(--ink);">{{ row.member.name }}</div>
-          {% if row.member.section %}<span class="badge {{ 'badge-blue' if row.member.section.value == 'boys' else 'badge-purple' }}">{{ row.member.section.value|title }}</span>{% endif %}
-        </div>
+{% set visible_depts = dept_names_for_viewer(current_user, row.member) %}
+          {% for d in visible_depts[:1] %}<span class="badge badge-blue">{{ d.name }}</span>{% endfor %}
+          {% if visible_depts|length > 1 %}<span class="badge">+{{ visible_depts|length - 1 }}</span>{% endif %}
+                </div>
       </div>
       {% if row.active %}<span class="status-live"><span class="pulse-dot"></span></span>{% endif %}
     </div>

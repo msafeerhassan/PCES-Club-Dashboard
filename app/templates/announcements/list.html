@@ -3,7 +3,7 @@
 {% block page_title %}Announcements{% endblock %}
 {% block content %}
 
-{% set is_admin = current_user.role.value in ['president', 'vp_boys', 'vp_girls'] %}
+{% set is_admin = current_user.role.value in ['president', 'department_admin'] %}
 <div class="events-toolbar">
   <span style="color:var(--muted); font-size:14px;">{{ items | length }} announcement{{ 's' if items|length != 1 else '' }}</span>
   {% if is_admin %}
@@ -19,6 +19,12 @@
   <span class="announcement-featured-badge">Latest</span>
   <h2>{{ latest.title }}</h2>
   <p>{{ latest.body }}</p>
+  <div style="margin-bottom:10px;">
+    {% if latest.is_club_wide %}<span class="badge">Club-wide</span>
+    {% else %}
+{% for d in latest.departments[:2] %}<span class="badge badge-blue">{{ d.name }}</span>{% endfor %}
+{% if latest.departments|length > 2 %}<span class="badge">+{{ latest.departments|length - 2 }} more</span>{% endif %}    {% endif %}
+  </div>
   <span class="announcement-meta">Posted by {{ latest.created_by.name }} · {{ latest.created_at.strftime('%b %d, %Y at %H:%M') }}</span>
 </div>
 
@@ -26,9 +32,16 @@
 <h2>Earlier</h2>
 <div class="announcement-grid">
   {% for a in rest %}
-  <div class="announcement-tile">
+<div class="announcement-tile">
     <span class="announcement-tile-title">{{ a.title }}</span>
     <p class="announcement-tile-body">{{ a.body[:90] }}{% if a.body|length > 90 %}…{% endif %}</p>
+    <div>
+      {% if a.is_club_wide %}<span class="badge">Club-wide</span>
+      {% else %}
+{% for d in latest.departments[:2] %}<span class="badge badge-blue">{{ d.name }}</span>{% endfor %}
+{% if latest.departments|length > 2 %}<span class="badge">+{{ latest.departments|length - 2 }} more</span>{% endif %}
+      {% endif %}
+    </div>
     <span class="announcement-meta">{{ a.created_at.strftime('%b %d, %Y') }}</span>
   </div>
   {% endfor %}

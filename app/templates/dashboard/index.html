@@ -6,21 +6,19 @@
 <div class="home-hero-v2" id="homeHero">
   <p class="home-eyebrow">{{ member.role.value.replace('_', ' ')|title }}</p>
   <h2 class="home-hero-title">Welcome back, <span class="marker-highlight">{{ member.name.split(' ')[0] }}</span></h2>
-  {% if sections %}
-  <p class="home-hero-meta">Viewing <strong>{{ sections | map(attribute='value') | join(', ') }}</strong> section data</p>
-  {% endif %}
+<p>Departments you can view: {{ departments | map(attribute='name') | join(', ') if departments else 'Your own data only' }}</p>
 
   <div class="sticker-row">
-    <div class="sticker sticker-red">
-      <strong>{{ (recent_seconds / 3600) | round(1) if recent_seconds is not none else '0' }}h</strong>
+<div class="sticker sticker-red">
+      <strong data-countup="{{ (recent_seconds / 3600) | round(1) if recent_seconds is not none else 0 }}" data-suffix="h">0h</strong>
       <span>This week</span>
     </div>
     {% if admin_summary %}
-    <div class="sticker sticker-orange"><strong>{{ admin_summary.total_members }}</strong><span>Members</span></div>
-    <div class="sticker sticker-blue"><strong>{{ admin_summary.submission_count }}</strong><span>Submissions</span></div>
-    <div class="sticker sticker-green"><strong>{{ admin_summary.active_now }}</strong><span>Active now</span></div>
+<div class="sticker sticker-orange"><strong data-countup="{{ admin_summary.total_members }}">0</strong><span>Members</span></div>
+    <div class="sticker sticker-blue"><strong data-countup="{{ admin_summary.submission_count }}">0</strong><span>Submissions</span></div>
+    <div class="sticker sticker-green"><strong data-countup="{{ admin_summary.active_now }}">0</strong><span>Active now</span></div>
     {% else %}
-    <div class="sticker sticker-orange"><strong>{{ upcoming_events | length }}</strong><span>Upcoming</span></div>
+    <div class="sticker sticker-orange"><strong data-countup="{{ upcoming_events | length }}">0</strong><span>Upcoming</span></div>
     {% endif %}
   </div>
 </div>

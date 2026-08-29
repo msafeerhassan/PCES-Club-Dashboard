@@ -4,8 +4,8 @@ from app.extensions import db
 from app.models.event import Event
 from app.models.member import Member
 from app.models.attendance import Attendance
-from app.models.enums import EventScopeEnum, SectionEnum
 from app.utils.permissions import can_manage_event
+from app.models.department import Department
 
 attendance_bp = Blueprint("attendance", __name__, url_prefix="/attendance")
 
@@ -17,12 +17,13 @@ def mark_attendance(event_id):
 
     if not can_manage_event(current_user, event):
         abort(403)
-
-    if event.scope == EventScopeEnum.CLUB_WIDE:
+    
+    if event.is_club_wide:
         eligible = Member.query.filter_by(is_disabled=False).all()
     else:
-        eligible = Member.query.filter_by(
-            section=SectionEnum(event.scope.value), is_disabled=False
+        dept_ids = [d.id for d in event.departments]
+        eligible = Member.query.filter(
+            Member.departments.any(Department.id.in_(dept_ids)), Member.is_disabled == False
         ).all()
 
     if request.method == "POST":

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Create Achievement - PCES{% endblock %}
+{% block page_title %}Create achievement{% endblock %}
+{% block content %}
+<div class="form-panel">
+  <form method="POST" class="form-card">
+    <label>Name <input type="text" name="name" required></label>
+    <label>Description <input type="text" name="description" required maxlength="255"></label>
+    <div class="form-row-2">
+      <label>Glyph (single symbol) <input type="text" name="glyph" maxlength="4" placeholder="★"></label>
+      <label>Color
+        <select name="color">
+          <option value="red">Red</option>
+          <option value="orange">Orange</option>
+          <option value="blue">Blue</option>
+          <option value="green">Green</option>
+          <option value="purple">Purple</option>
+        </select>
+      </label>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Create</button>
+      <a href="{{ url_for('achievements.manage') }}" class="btn">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

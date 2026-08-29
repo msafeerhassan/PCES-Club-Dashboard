@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Department Health - PCES{% endblock %}
+{% block page_title %}Department health{% endblock %}
+{% block content %}
+
+{% if not available %}
+<div class="empty-state-card"><h3>No departments assigned to you</h3></div>
+{% else %}
+
+{% if available | length > 1 %}
+<form method="GET" class="search-form">
+  <select name="department_id" onchange="this.form.submit()">
+    {% for d in available %}
+    <option value="{{ d.id }}" {{ 'selected' if selected.id == d.id else '' }}>{{ d.name }}</option>
+    {% endfor %}
+  </select>
+</form>
+{% else %}
+<p style="color:var(--muted); margin-bottom:16px;">{{ selected.name }}</p>
+{% endif %}
+
+<div class="summary-stat-grid">
+  <div class="summary-stat-card"><span class="summary-stat-value" data-countup="{{ data.member_count }}">0</span><span class="summary-stat-label">Members</span></div>
+  <div class="summary-stat-card"><span class="summary-stat-value" data-countup="{{ data.submission_count }}">0</span><span class="summary-stat-label">Approved projects</span></div>
+  <div class="summary-stat-card"><span class="summary-stat-value" data-countup="{{ data.pending_count }}">0</span><span class="summary-stat-label">Pending review</span></div>
+  <div class="summary-stat-card"><span class="summary-stat-value" data-countup="{{ data.active_now }}">0</span><span class="summary-stat-label">Active now</span></div>
+  <div class="summary-stat-card">
+    {% if data.attendance_rate is not none %}
+    <span class="summary-stat-value" data-countup="{{ data.attendance_rate }}" data-suffix="%">0%</span>
+    {% else %}<span class="summary-stat-value">-</span>{% endif %}
+    <span class="summary-stat-label">Attendance rate</span>
+  </div>
+</div>
+
+<div class="health-grid">
+  <div class="health-card">
+    <div class="health-card-label">Hackatime adoption</div>
+    <div class="adoption-bar-track"><div class="adoption-bar-fill" style="width: {{ data.adoption_pct }}%;"></div></div>
+    <div class="health-card-value">{{ data.adoption_pct }}%</div>
+  </div>
+  <div class="health-card">
+    <div class="health-card-label">Achievements earned</div>
+    <div class="health-card-value">{{ data.achievements_earned }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head"><span class="card-icon" style="background:var(--hc-red);">▲</span><h2>Top contributors</h2></div>
+  {% if data.top_contributors %}
+  {% set max_hours = (data.top_contributors | map(attribute=1) | max) or 1 %}
+  <div class="rank-list">
+    {% for m, hours in data.top_contributors %}
+    <div class="rank-row">
+      <span class="rank-badge">{{ loop.index }}</span>
+      <span class="rank-name">{{ m.name }}</span>
+      <div class="rank-bar-track"><div class="rank-bar-fill" style="width: {{ (hours / max_hours * 100) if max_hours else 0 }}%;"></div></div>
+      <span class="rank-hours">{{ hours }}h</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="color:var(--muted); font-size:14px;">No activity yet.</p>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

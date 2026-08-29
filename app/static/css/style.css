@@ -334,7 +334,7 @@ body.guest {
 }
 body.dark-mode.guest { background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px); }
 
-.gtop { position: sticky; top: 0; z-index: 20; backdrop-filter: blur(10px); background: rgba(251,251,253,0.85); border-bottom: 1px solid var(--border); }
+.gtop { position: sticky; top: 0; z-index: 20; backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
 body.dark-mode .gtop { background: rgba(18,18,23,0.85); }
 .gtop-nav { display: flex; gap: 26px; }
 .gtop-nav a { color: var(--slate); font-weight: 600; font-size: 14px; }
@@ -1062,3 +1062,111 @@ body.dark-mode .badge-warning { color: var(--hc-orange); }
 .admin-sub-card .link-chips { margin-bottom: 14px; }
 .review-actions { margin-top: 4px; }
 
+/* ══════════ DARK MODE ONLY — LOCKED ══════════ */
+:root {
+  --bg: #121217;
+  --card: #191920;
+  --border: #2a2a33;
+  --fill: #1e1e26;
+  --ink: #f7f7fa;
+  --slate: #cbd1dc;
+  --muted: #8f97a8;
+  --rail: #0c0c10;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 8px 20px rgba(0,0,0,0.35);
+  --shadow-lg: 0 20px 48px rgba(0,0,0,0.5);
+}
+
+/* ══════════ DEPARTMENT PICKER — proper checkbox list styling ══════════ */
+.dept-picker {
+  display: flex; flex-direction: column; gap: 2px; background: var(--fill);
+  border: 1px solid var(--border); border-radius: 10px; padding: 6px; max-height: 220px; overflow-y: auto;
+}
+.form-card label.dept-picker-item {
+  display: flex; flex-direction: row; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 7px;
+  color: var(--ink) !important; font-size: 13.5px; font-weight: 500; cursor: pointer;
+}
+.dept-picker-item:hover { background: var(--card); }
+.dept-picker-item input { width: auto !important; flex-shrink: 0; accent-color: var(--hc-red); }
+
+/* ══════════ LIVE ADDITIONS — count-up, radial rings, network canvas ══════════ */
+
+.radial-svg circle.fill { transition: stroke-dashoffset 0.1s linear; }
+
+.live-network-wrap {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  padding: 20px 24px; margin-bottom: 20px; box-shadow: var(--shadow-sm);
+}
+.live-network-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+.live-network-header h2 { margin: 0; }
+.live-network-header span { font-size: 12.5px; color: var(--muted); }
+#liveNetwork { width: 100%; height: 140px; display: block; }
+
+/* ══════════ LEADERBOARD REBUILD ══════════ */
+
+.lb-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+
+.podium { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+.podium-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  padding: 20px 16px; text-align: center; box-shadow: var(--shadow-sm);
+  opacity: 0; transform: translateY(12px); animation: podiumIn 0.45s cubic-bezier(.22,1,.36,1) forwards;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.podium-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+@keyframes podiumIn { to { opacity: 1; transform: translateY(0); } }
+.podium-card.rank-1 { order: 2; border-color: #d4af37; padding-top: 8px; }
+.podium-card.rank-2 { order: 1; margin-top: 20px; }
+.podium-card.rank-3 { order: 3; margin-top: 28px; }
+
+.podium-medal {
+  width: 40px; height: 40px; border-radius: 999px; display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 16px; margin: 0 auto 10px; color: #1a1408;
+}
+.podium-card.rank-1 .podium-medal { background: linear-gradient(135deg, #ffe08a, #d4af37); width: 52px; height: 52px; font-size: 20px; }
+.podium-card.rank-2 .podium-medal { background: linear-gradient(135deg, #e8e8ec, #b0b3ba); }
+.podium-card.rank-3 .podium-medal { background: linear-gradient(135deg, #e8b384, #b87333); }
+
+.podium-avatar {
+  width: 44px; height: 44px; border-radius: 999px; background: var(--gradient-warm); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 800; margin: 0 auto 8px;
+}
+.podium-name { font-weight: 800; font-size: 14px; color: var(--ink); margin-bottom: 4px; }
+.podium-value { font-size: 20px; font-weight: 800; color: var(--hc-red); }
+
+.lb-list { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 8px; box-shadow: var(--shadow-sm); }
+.lb-row {
+  display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 10px;
+  opacity: 0; transform: translateX(-8px); animation: lbRowIn 0.4s cubic-bezier(.22,1,.36,1) forwards;
+  transition: background 0.15s ease;
+}
+.lb-row:hover { background: var(--fill); }
+@keyframes lbRowIn { to { opacity: 1; transform: translateX(0); } }
+
+.lb-rank { width: 26px; text-align: center; font-weight: 800; color: var(--muted); font-size: 13px; flex-shrink: 0; }
+.lb-bar-track { flex: 1; height: 8px; background: var(--fill); border-radius: 999px; overflow: hidden; }
+.lb-bar-fill { height: 100%; background: var(--gradient-warm); border-radius: 999px; width: 0; transition: width 0.7s cubic-bezier(.22,1,.36,1); }
+.lb-value { width: 60px; text-align: right; font-weight: 800; font-size: 13.5px; color: var(--ink); flex-shrink: 0; }
+
+
+/* ══════════ ACHIEVEMENTS ══════════ */
+
+.achievement-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }
+.achievement-badge {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 20px 16px; text-align: center; box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.achievement-badge:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.achievement-badge.locked { opacity: 0.4; filter: grayscale(1); }
+.achievement-glyph {
+  display: flex; align-items: center; justify-content: center; width: 52px; height: 52px;
+  border-radius: 999px; margin: 0 auto 12px; font-size: 22px; color: #fff;
+}
+.ach-red .achievement-glyph { background: var(--hc-red); }
+.ach-orange .achievement-glyph { background: var(--hc-orange); }
+.ach-blue .achievement-glyph { background: var(--hc-blue); }
+.ach-green .achievement-glyph { background: var(--hc-green); }
+.ach-purple .achievement-glyph { background: var(--hc-purple); }
+.achievement-name { display: block; font-weight: 800; font-size: 14px; color: var(--ink); margin-bottom: 4px; }
+.achievement-desc { display: block; font-size: 11.5px; color: var(--muted); }

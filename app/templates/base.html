@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}PCES Dashboard{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="{{ url_for('static', filename='js/live.js') }}" defer></script>
 </head>
 <body class="authed">
   <script>
@@ -51,20 +52,32 @@
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M3 11v2a2 2 0 0 0 2 2h1l4 4V7L6 11H5a2 2 0 0 0-2 2z"/><path d="M15 8a4 4 0 0 1 0 8"/></svg>
           Announcements
         </a>
+                <a href="{{ url_for('leaderboard.index') }}" class="nav-link {{ 'is-active' if request.endpoint == 'leaderboard.index' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a2 2 0 0 0 0 4h1M17 6h3a2 2 0 0 1 0 4h-1"/></svg>
+          Leaderboard
+        </a>
+                <a href="{{ url_for('achievements.index') }}" class="nav-link {{ 'is-active' if request.endpoint == 'achievements.index' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.5 7 21l5-3 5 3-1.5-7.5"/></svg>
+          Achievements
+        </a>
         <a href="{{ url_for('profile.view_profile') }}" class="nav-link {{ 'is-active' if request.endpoint == 'profile.view_profile' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>
           Profile
         </a>
 
-        {% set is_admin_role = current_user.role.value in ['president', 'vp_boys', 'vp_girls'] %}
-        {% set is_view_role = current_user.role.value in ['president', 'vp_boys', 'vp_girls', 'faculty_advisor'] %}
+{% set is_admin_role = current_user.role.value in ['president', 'department_admin'] %}
+        {% set is_view_role = current_user.role.value in ['president', 'department_admin', 'faculty_advisor'] %}
         {% if is_view_role %}
         <div class="sidebar-label">Admin</div>
         <a href="{{ url_for('admin.summary') }}" class="nav-link {{ 'is-active' if request.endpoint == 'admin.summary' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
           Summary
         </a>
-        {% if is_admin_role %}
+                <a href="{{ url_for('admin.department_health') }}" class="nav-link {{ 'is-active' if request.endpoint == 'admin.department_health' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          Department Health
+        </a>
+{% if is_view_role %}
         <a href="{{ url_for('admin.members_list') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('admin.member') else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3 3-5 7-5s7 2 7 5"/><circle cx="18" cy="8" r="2.5"/><path d="M15 14c2.5.3 4.5 2 4.5 4.5"/></svg>
           Members
@@ -77,6 +90,17 @@
         <a href="{{ url_for('activity.admin_list') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('activity.admin') else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M3 17l5-5 4 4 8-9"/></svg>
           Member Activity
+        </a>
+
+        {% if current_user.role.value == 'president' %}
+        <a href="{{ url_for('departments.list_departments') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('departments.') else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M3 21V7l9-4 9 4v14"/><path d="M9 21v-6h6v6"/></svg>
+          Departments
+        </a>
+        {% endif %}
+        <a href="{{ url_for('achievements.manage') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('achievements.manage') else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.5 7 21l5-3 5 3-1.5-7.5"/></svg>
+          Manage Achievements
         </a>
         <a href="{{ url_for('reports.export_csv') }}" class="nav-link">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
@@ -93,7 +117,6 @@
           </div>
         </div>
         <div class="sidebar-footer-actions">
-          <button class="theme-toggle" onclick="toggleTheme()">Theme</button>
           <a href="{{ url_for('auth.logout') }}" class="logout-btn">Log out</a>
         </div>
       </div>

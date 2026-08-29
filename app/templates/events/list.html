@@ -4,10 +4,10 @@
 {% block content %}
 
 <div class="events-toolbar">
-  <span style="color:var(--muted); font-size:14px;">{{ events | length }} event{{ 's' if events | length != 1 else '' }}</span>
-  {% if current_user.role.value in ['president', 'vp_boys', 'vp_girls'] %}
-  <a href="{{ url_for('events.new_event') }}" class="btn btn-primary">Create event</a>
-  {% endif %}
+<span style="color:var(--muted); font-size:14px;"><strong data-countup="{{ events | length }}" style="color:var(--ink);">0</strong> event{{ 's' if events | length != 1 else '' }}</span>
+{% if current_user.role.value in ['president', 'department_admin'] %}
+<a href="{{ url_for('events.new_event') }}" class="btn btn-primary">Create event</a>
+{% endif %}
 </div>
 
 {% if events %}
@@ -20,11 +20,13 @@
     </div>
     <div class="event-card-body">
       <span class="event-card-title">{{ e.title }}</span>
-      <div class="event-card-badges">
-        {% if e.scope.value == 'club_wide' %}<span class="badge">Club-wide</span>
-        {% elif e.scope.value == 'boys' %}<span class="badge badge-blue">Boys</span>
-        {% else %}<span class="badge badge-purple">Girls</span>
-        {% endif %}
+<div class="event-card-badges">
+        {% if e.is_club_wide %}<span class="badge">Club-wide</span>
+        {% else %}
+          {% for d in dept_names_for_viewer(current_user, e) if False %}{% endfor %}
+{% for d in e.departments[:2] %}<span class="badge badge-blue">{{ d.name }}</span>{% endfor %}
+          {% if e.departments|length > 2 %}<span class="badge">+{{ e.departments|length - 2 }} more</span>{% endif %}
+                  {% endif %}
       </div>
       <div class="event-card-deadline">
         {% if e.submission_deadline %}Submit by <strong>{{ e.submission_deadline.strftime('%b %d, %H:%M') }}</strong>

@@ -1,9 +1,19 @@
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 from flask import Flask
 from app.config import Config
 from app.extensions import db, login_manager, oauth
 
 
 def create_app():
+    if Config.SENTRY_DSN:
+        sentry_sdk.init(
+            dsn=Config.SENTRY_DSN,
+            integrations=[FlaskIntegration()],
+            traces_sample_rate=0.1,
+            environment="development",
+        )
+
     app = Flask(__name__)
     app.config.from_object(Config)
 
@@ -13,6 +23,8 @@ def create_app():
 
     login_manager.login_view = "auth.login"
 
+    from app.utils.permissions import department_names_for_viewer
+    app.jinja_env.globals["dept_names_for_viewer"] = department_names_for_viewer
     from app import models  # noqa: F401 -- registers models with SQLAlchemy
     from app import utils  # noqa: F401
     from app.utils.login import load_user  # noqa: F401 -- registers user_loader
@@ -34,6 +46,9 @@ def create_app():
     from app.routes.profile import profile_bp
     from app.routes.announcements import announcements_bp
     from app.routes.resources import resources_bp
+    from app.routes.departments import departments_bp
+    from app.routes.leaderboard import leaderboard_bp
+    from app.routes.achievements import achievements_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -48,5 +63,8 @@ def create_app():
     app.register_blueprint(profile_bp)
     app.register_blueprint(announcements_bp)
     app.register_blueprint(resources_bp)
+    app.register_blueprint(departments_bp)
+    app.register_blueprint(leaderboard_bp)
+    app.register_blueprint(achievements_bp)
 
     return app

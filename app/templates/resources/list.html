@@ -3,7 +3,7 @@
 {% block page_title %}Resources{% endblock %}
 {% block content %}
 
-{% set is_admin = current_user.role.value in ['president', 'vp_boys', 'vp_girls'] %}
+{% set is_admin = current_user.role.value in ['president', 'department_admin'] %}
 <div class="events-toolbar">
   <span style="color:var(--muted); font-size:14px;">{{ items | length }} resource{{ 's' if items|length != 1 else '' }}</span>
   {% if is_admin %}

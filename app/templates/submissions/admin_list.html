@@ -5,10 +5,11 @@
 
 <form method="GET" class="search-form">
   <input type="text" name="q" placeholder="Search by member name" value="{{ search }}">
-  <select name="section">
-    <option value="">All sections</option>
-    <option value="boys" {{ 'selected' if section_filter == 'boys' else '' }}>Boys</option>
-    <option value="girls" {{ 'selected' if section_filter == 'girls' else '' }}>Girls</option>
+  <select name="department">
+    <option value="">All departments</option>
+    {% for d in departments %}
+    <option value="{{ d.id }}" {{ 'selected' if dept_filter == d.id|string else '' }}>{{ d.name }}</option>
+    {% endfor %}
   </select>
   <select name="status">
     <option value="">All statuses</option>
@@ -18,6 +19,8 @@
   </select>
   <button type="submit" class="btn">Filter</button>
 </form>
+
+<p style="color:var(--muted); font-size:14px; margin-bottom:14px;"><strong data-countup="{{ submissions | length }}" style="color:var(--ink);">0</strong> submission{{ 's' if submissions | length != 1 else '' }}</p>
 
 {% if submissions %}
 <div class="admin-sub-grid">
@@ -29,8 +32,10 @@
       <span class="member-avatar">{{ s.member.name[0] }}</span>
       <div>
         <div style="font-weight:700; font-size:13.5px; color:var(--ink);">{{ s.member.name }}</div>
-        {% if s.member.section %}<span class="badge {{ 'badge-blue' if s.member.section.value == 'boys' else 'badge-purple' }}" style="margin-top:2px;">{{ s.member.section.value|title }}</span>{% endif %}
-      </div>
+{% set visible_depts = dept_names_for_viewer(current_user, s.member) %}
+        {% for d in visible_depts[:1] %}<span class="badge badge-blue" style="margin-top:2px;">{{ d.name }}</span>{% endfor %}
+        {% if visible_depts|length > 1 %}<span class="badge" style="margin-top:2px;">+{{ visible_depts|length - 1 }}</span>{% endif %}
+            </div>
     </div>
 
 <div class="admin-sub-title">{{ s.title }}</div>

@@ -22,3 +22,7 @@ class Config:
     SUPABASE_URL = os.environ.get("SUPABASE_URL")
     SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
     SUPABASE_STORAGE_BUCKET = os.environ.get("SUPABASE_STORAGE_BUCKET")
+
+    DISCORD_BOT_TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
+    DISCORD_CLUBWIDE_CHANNEL_ID = os.environ.get("DISCORD_CLUBWIDE_CHANNEL_ID")
+    SENTRY_DSN = os.environ.get("SENTRY_DSN")

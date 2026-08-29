@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Departments - PCES{% endblock %}
+{% block page_title %}Departments{% endblock %}
+{% block content %}
+
+<div class="toolbar">
+  <span style="color:var(--muted); font-size:14px;">{{ items | length }} department{{ 's' if items|length != 1 else '' }}</span>
+  <a href="{{ url_for('departments.new_department') }}" class="btn btn-primary">Add department</a>
+</div>
+
+{% if items %}
+<div class="resource-grid">
+  {% for d in items %}
+  <div class="resource-card">
+    <span class="resource-card-title">{{ d.name }}</span>
+    <div class="resource-card-footer">
+      <a href="{{ url_for('departments.edit_department', department_id=d.id) }}" class="btn btn-small">Edit</a>
+      <form method="POST" action="{{ url_for('departments.delete_department', department_id=d.id) }}" class="inline-form" onsubmit="return confirm('Delete this department? Members and events assigned to it will lose that assignment.');">
+        <button type="submit" class="btn btn-small">Delete</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state-card"><h3>No departments yet</h3></div>
+{% endif %}
+{% endblock %}

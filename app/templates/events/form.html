@@ -5,6 +5,8 @@
 
 <form method="POST" class="form-panel">
   <div class="form-card">
+    {% if error %}<p style="color:var(--hc-red); font-weight:700;">{{ error }}</p>{% endif %}
+
     <label>Title
       <input type="text" name="title" value="{{ event.title if event else '' }}" required>
     </label>
@@ -13,15 +15,41 @@
     </label>
 
     {% if not event %}
-    <label>Scope
-      <select name="scope">
-        {% for s in scopes %}
-        <option value="{{ s.value }}">{{ s.value.replace('_', ' ')|title }}</option>
-        {% endfor %}
-      </select>
-    </label>
+      {% if current_user.role.value == 'president' %}
+      <label class="dept-picker-item" style="background:var(--fill); border-radius:10px; padding:10px 14px;">
+        <input type="checkbox" name="is_club_wide" id="clubWideToggle" onchange="document.getElementById('deptBlock').style.display = this.checked ? 'none' : 'block';">
+        This is a club-wide event (all departments)
+      </label>
+      {% endif %}
+      <div id="deptBlock">
+        <label>Departments
+          <div class="dept-picker">
+            {% for d in departments %}
+            <label class="dept-picker-item">
+              <input type="checkbox" name="departments" value="{{ d.id }}">
+              {{ d.name }}
+            </label>
+            {% endfor %}
+          </div>
+        </label>
+      </div>
     {% else %}
-    <p class="form-static">Scope: <strong>{{ event.scope.value.replace('_', ' ')|title }}</strong> (cannot be changed after creation)</p>
+      <p class="form-static">
+        Scope: <strong>{{ 'Club-wide' if event.is_club_wide else (event.departments | map(attribute='name') | join(', ')) }}</strong>
+        {% if not event.is_club_wide %}(departments can be updated below){% endif %}
+      </p>
+      {% if not event.is_club_wide %}
+      <label>Departments
+        <div class="dept-picker">
+          {% for d in departments %}
+          <label class="dept-picker-item">
+            <input type="checkbox" name="departments" value="{{ d.id }}" {{ 'checked' if d in event.departments else '' }}>
+            {{ d.name }}
+          </label>
+          {% endfor %}
+        </div>
+      </label>
+      {% endif %}
     {% endif %}
 
     <div class="form-row-2">

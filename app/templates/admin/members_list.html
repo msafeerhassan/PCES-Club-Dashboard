@@ -4,7 +4,9 @@
 {% block content %}
 
 <div class="toolbar">
+  {% if current_user.role.value != 'faculty_advisor' %}
   <a href="{{ url_for('admin.member_new') }}" class="btn btn-primary">Add member</a>
+  {% endif %}
   <form method="GET" class="search-form">
     <input type="text" name="q" placeholder="Search by name" value="{{ search }}">
     <button type="submit" class="btn">Search</button>
@@ -25,8 +27,9 @@
 
     <div class="member-card-badges">
       <span class="badge">{{ m.role.value.replace('_', ' ')|title }}</span>
-      {% if m.section %}<span class="badge {{ 'badge-blue' if m.section.value == 'boys' else 'badge-purple' }}">{{ m.section.value|title }}</span>{% endif %}
-      {% if m.is_disabled %}<span class="badge badge-danger" title="{{ m.disabled_reason }}">Disabled</span>
+{% set visible_depts = dept_names_for_viewer(current_user, m) %}
+      {% for d in visible_depts[:2] %}<span class="badge badge-blue">{{ d.name }}</span>{% endfor %}
+      {% if visible_depts|length > 2 %}<span class="badge">+{{ visible_depts|length - 2 }} more</span>{% endif %}      {% if m.is_disabled %}<span class="badge badge-danger" title="{{ m.disabled_reason }}">Disabled</span>
       {% elif m.is_active_account %}<span class="badge badge-success">Active</span>
       {% else %}<span class="badge">Invited</span>
       {% endif %}
@@ -35,6 +38,7 @@
     <div class="member-card-meta">Joined {{ m.created_at.strftime('%b %d, %Y') }}</div>
 
     <div class="member-card-actions">
+      {% if current_user.role.value != 'faculty_advisor' %}
       <a href="{{ url_for('admin.member_edit', member_id=m.id) }}" class="btn btn-small">Edit</a>
       {% if m.is_disabled %}
       <form method="POST" action="{{ url_for('admin.member_enable', member_id=m.id) }}" class="inline-form" style="flex:1;">
@@ -42,6 +46,7 @@
       </form>
       {% else %}
       <a href="{{ url_for('admin.member_disable', member_id=m.id) }}" class="btn btn-small" style="flex:1; text-align:center;">Disable</a>
+      {% endif %}
       {% endif %}
     </div>
   </div>

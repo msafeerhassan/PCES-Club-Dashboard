@@ -16,11 +16,11 @@
 </div>
 
 <div class="stat-grid" style="margin-bottom:18px;">
-  <div class="stat-card"><span class="stat-value">{{ (hours.total_seconds / 3600) | round(1) if hours else '-' }}</span><span class="stat-label">Hours (7d)</span></div>
-  <div class="stat-card"><span class="stat-value">{{ streak.streak_days if streak else '-' }}</span><span class="stat-label">Current streak</span></div>
-  <div class="stat-card"><span class="stat-value">{{ longest_streak }}</span><span class="stat-label">Longest streak</span></div>
-  <div class="stat-card"><span class="stat-value">{{ (hours.total_seconds / 3600 / 7) | round(1) if hours else '-' }}</span><span class="stat-label">Their avg (hrs/day)</span></div>
-  <div class="stat-card"><span class="stat-value">{{ (club_average / 7) | round(1) if club_average else 0 }}</span><span class="stat-label">Peer avg (hrs/day)</span></div>
+  <div class="stat-card"><span class="stat-value" data-countup="{{ (hours.total_seconds / 3600) | round(1) if hours else 0 }}">0</span><span class="stat-label">Hours (7d)</span></div>
+  <div class="stat-card"><span class="stat-value" data-countup="{{ streak.streak_days if streak else 0 }}">0</span><span class="stat-label">Current streak</span></div>
+  <div class="stat-card"><span class="stat-value" data-countup="{{ longest_streak }}">0</span><span class="stat-label">Longest streak</span></div>
+  <div class="stat-card"><span class="stat-value" data-countup="{{ (hours.total_seconds / 3600 / 7) | round(1) if hours else 0 }}">0</span><span class="stat-label">Your avg (hrs/day)</span></div>
+  <div class="stat-card"><span class="stat-value" data-countup="{{ (club_average / 7) | round(1) if club_average else 0 }}">0</span><span class="stat-label">Club avg (hrs/day)</span></div>
 </div>
 
 {% if latest_heartbeat %}

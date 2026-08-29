@@ -22,24 +22,25 @@
     <p class="form-static">Email: <strong style="color:var(--ink);">{{ member.email }}</strong> (cannot be changed)</p>
     {% endif %}
 
-    <div class="form-row-2">
-      <label>Role
-        <select name="role">
-          {% for r in roles %}
-          <option value="{{ r.value }}" {{ 'selected' if member and member.role == r else '' }}>{{ r.value.replace('_', ' ')|title }}</option>
-          {% endfor %}
-        </select>
-      </label>
+    <label>Role
+      <select name="role">
+        {% for r in roles %}
+        <option value="{{ r.value }}" {{ 'selected' if member and member.role == r else '' }}>{{ r.value.replace('_', ' ')|title }}</option>
+        {% endfor %}
+      </select>
+    </label>
 
-      <label>Section
-        <select name="section">
-          <option value="">None (club-wide role)</option>
-          {% for s in sections %}
-          <option value="{{ s.value }}" {{ 'selected' if member and member.section == s else '' }}>{{ s.value|title }}</option>
-          {% endfor %}
-        </select>
-      </label>
-    </div>
+<label>Departments
+      <div class="dept-picker">
+        {% for d in departments %}
+        <label class="dept-picker-item">
+          <input type="checkbox" name="departments" value="{{ d.id }}" {{ 'checked' if member and d in member.departments else '' }}>
+          {{ d.name }}
+        </label>
+        {% endfor %}
+        {% if not departments %}<p class="form-static">No departments available. Ask the President to create one first.</p>{% endif %}
+      </div>
+    </label>
 
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">Save member</button>

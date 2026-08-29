@@ -8,7 +8,7 @@ from app.models.member import Member
 from app.models.attendance import Attendance
 from app.models.submission import Submission
 from app.models.enums import RoleEnum
-from app.utils.permissions import visible_sections, VIEW_ALL_ROLES
+from app.utils.permissions import visible_departments, VIEW_ALL_ROLES
 from app.utils.hackatime_client import get_hours
 
 reports_bp = Blueprint("reports", __name__, url_prefix="/reports")
@@ -17,14 +17,19 @@ reports_bp = Blueprint("reports", __name__, url_prefix="/reports")
 @reports_bp.route("/export.csv")
 @login_required
 def export_csv():
-    sections = visible_sections(current_user)
-    if not sections:
+    from app.models.department import Department
+
+    departments = visible_departments(current_user)
+    if not departments:
         abort(403)
+    dept_ids = [d.id for d in departments]
 
     if current_user.role in VIEW_ALL_ROLES:
         members = Member.query.filter(Member.role == RoleEnum.MEMBER).all()
     else:
-        members = Member.query.filter(Member.section.in_(sections)).all()
+        members = Member.query.filter(
+            Member.departments.any(Department.id.in_(dept_ids)), Member.role == RoleEnum.MEMBER
+        ).all()
 
     output = io.StringIO()
     writer = csv.writer(output)
@@ -47,7 +52,7 @@ def export_csv():
             hours_value = round(hours["total_seconds"] / 3600, 1) if hours else "unavailable"
 
         writer.writerow([
-            m.name, m.email, m.section.value if m.section else "-", m.role.value,
+            m.name, m.email, ", ".join(d.name for d in m.departments) or "-", m.role.value,
             attended, total_marked, submission_count,
             "Yes" if connection else "No", hours_value,
         ])

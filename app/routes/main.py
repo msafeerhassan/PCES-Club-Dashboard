@@ -12,9 +12,8 @@ def home():
     total_members = Member.query.filter_by(is_disabled=False).count()
     total_events = Event.query.count()
     total_submissions = Submission.query.count()
-
     leadership = Member.query.filter(
-        Member.role.in_([RoleEnum.PRESIDENT, RoleEnum.VP_BOYS, RoleEnum.VP_GIRLS, RoleEnum.FACULTY_ADVISOR])
+        Member.role.in_([RoleEnum.PRESIDENT, RoleEnum.DEPARTMENT_ADMIN, RoleEnum.FACULTY_ADVISOR])
     ).all()
 
     featured_projects = [

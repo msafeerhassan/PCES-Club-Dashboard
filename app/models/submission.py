@@ -9,6 +9,7 @@ class Submission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     member_id = db.Column(db.Integer, db.ForeignKey("members.id"), nullable=False)
     event_id = db.Column(db.Integer, db.ForeignKey("events.id"), nullable=True)  # null = standalone/personal
+    department_id = db.Column(db.Integer, db.ForeignKey("departments.id"), nullable=True)
 
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -25,6 +26,7 @@ class Submission(db.Model):
     feedback = db.Column(db.Text, nullable=True)
 
     member = db.relationship("Member", backref="submissions", foreign_keys=[member_id])
+    department = db.relationship("Department")
     event = db.relationship("Event", backref="submissions")
     reviewed_by = db.relationship("Member", foreign_keys=[reviewed_by_id])
 

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Manage Achievements - PCES{% endblock %}
+{% block page_title %}Manage achievements{% endblock %}
+{% block content %}
+
+<div class="toolbar">
+  <span style="color:var(--muted); font-size:14px;">Custom achievements you've created</span>
+  <a href="{{ url_for('achievements.new_achievement') }}" class="btn btn-primary">Create achievement</a>
+</div>
+
+{% if achievements %}
+<div class="achievement-grid">
+  {% for a in achievements %}
+  <div class="achievement-badge earned ach-{{ a.color }}">
+    <span class="achievement-glyph">{{ a.glyph }}</span>
+    <span class="achievement-name">{{ a.name }}</span>
+    <span class="achievement-desc">{{ a.description }}</span>
+    <a href="{{ url_for('achievements.award', achievement_id=a.id) }}" class="btn btn-small" style="margin-top:10px;">Award to member</a>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state-card"><h3>No custom achievements yet</h3></div>
+{% endif %}
+{% endblock %}

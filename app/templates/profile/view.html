@@ -9,7 +9,7 @@
     <div class="profile-hero-name">{{ member.name }}</div>
     <div class="profile-badges">
       <span class="badge">{{ member.role.value.replace('_', ' ')|title }}</span>
-      {% if member.section %}<span class="badge {{ 'badge-blue' if member.section.value == 'boys' else 'badge-purple' }}">{{ member.section.value|title }}</span>{% endif %}
+<p>Department(s): {{ (member.departments | map(attribute='name') | join(', ')) if member.departments else 'None assigned' }}</p>
       {% if member.is_active_account %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-danger">Not yet claimed</span>{% endif %}
       {% if member.hackatime_connection %}<span class="badge badge-success">Hackatime connected</span>{% else %}<span class="badge">Hackatime not connected</span>{% endif %}
     </div>
@@ -18,8 +18,27 @@
 </div>
 
 <div class="stat-grid">
-  <div class="stat-card"><span class="stat-value">{{ attendance_pct if attendance_pct is not none else '-' }}{{ '%' if attendance_pct is not none else '' }}</span><span class="stat-label">Attendance rate</span></div>
-  <div class="stat-card"><span class="stat-value">{{ submission_count }}</span><span class="stat-label">Projects submitted</span></div>
-  <div class="stat-card"><span class="stat-value">{{ current_streak if current_streak is not none else '-' }}</span><span class="stat-label">Current streak</span></div>
+  <div class="stat-card">
+    {% if attendance_pct is not none %}
+    <div class="radial-wrap">
+      <svg class="radial-svg" width="52" height="52" viewBox="0 0 64 64">
+        <defs>
+          <linearGradient id="radialGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="var(--hc-red)"/>
+            <stop offset="100%" stop-color="var(--hc-orange)"/>
+          </linearGradient>
+        </defs>
+        <circle class="track" cx="32" cy="32" r="26"/>
+        <circle class="fill" cx="32" cy="32" r="26" data-radial="{{ attendance_pct }}"/>
+        <text x="32" y="37" text-anchor="middle" style="font-size:13px;">{{ attendance_pct | round | int }}%</text>
+      </svg>
+    </div>
+    {% else %}
+    <span class="stat-value">-</span>
+    {% endif %}
+    <span class="stat-label">Attendance rate</span>
+  </div>
+  <div class="stat-card"><span class="stat-value" data-countup="{{ submission_count }}">0</span><span class="stat-label">Projects submitted</span></div>
+  <div class="stat-card"><span class="stat-value" data-countup="{{ current_streak if current_streak is not none else 0 }}">0</span><span class="stat-label">Current streak</span></div>
 </div>
 {% endblock %}

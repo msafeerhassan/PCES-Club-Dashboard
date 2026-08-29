@@ -27,6 +27,18 @@
       </div>
     </label>
 
+    {% if error %}<p style="color:var(--hc-red); font-weight:700;">{{ error }}</p>{% endif %}
+    {% if member_departments | length > 1 %}
+    <label>Which department is this project for?
+      <select name="department_id" required>
+        <option value="">-- select --</option>
+        {% for d in member_departments %}
+        <option value="{{ d.id }}">{{ d.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    {% endif %}
+
     <label>Hackatime project
       <select name="hackatime_project_name">
         <option value="">-- none --</option>

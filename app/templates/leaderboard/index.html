@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard - PCES{% endblock %}
+{% block page_title %}Leaderboard{% endblock %}
+{% block content %}
+
+<div class="lb-tabs">
+  <a href="{{ url_for('leaderboard.index', tab='hours') }}" class="btn btn-small {{ 'btn-primary' if tab == 'hours' else '' }}">Hours</a>
+  <a href="{{ url_for('leaderboard.index', tab='streak') }}" class="btn btn-small {{ 'btn-primary' if tab == 'streak' else '' }}">Streak</a>
+  <a href="{{ url_for('leaderboard.index', tab='submissions') }}" class="btn btn-small {{ 'btn-primary' if tab == 'submissions' else '' }}">Submissions</a>
+  <a href="{{ url_for('leaderboard.index', tab='attendance') }}" class="btn btn-small {{ 'btn-primary' if tab == 'attendance' else '' }}">Attendance</a>
+</div>
+
+{% if rows %}
+{% set unit = 'h' if tab == 'hours' else ('d' if tab == 'streak' else ('%' if tab == 'attendance' else '')) %}
+{% set max_val = rows[0][tab] or 1 %}
+
+{% if rows | length >= 3 %}
+<div class="podium">
+  {% for r in rows[:3] %}
+  <div class="podium-card rank-{{ loop.index }}" style="animation-delay: {{ loop.index0 * 0.06 }}s;">
+    <div class="podium-medal">{{ loop.index }}</div>
+    <div class="podium-avatar">{{ r.member.name[0] }}</div>
+    <div class="podium-name">{{ r.member.name }}</div>
+    <div class="podium-value">{{ r[tab] }}{{ unit }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="lb-list">
+  {% for r in rows %}
+  <div class="lb-row" style="animation-delay: {{ loop.index0 * 0.03 }}s;">
+    <span class="lb-rank">{{ loop.index }}</span>
+    <div class="member-chip" style="width:170px; flex-shrink:0;">
+      <span class="member-avatar">{{ r.member.name[0] }}</span>
+      <span style="font-weight:600; font-size:13.5px; color:var(--ink);">{{ r.member.name }}</span>
+    </div>
+    <div class="lb-bar-track"><div class="lb-bar-fill" data-fill="{{ (r[tab] / max_val * 100) if max_val else 0 }}"></div></div>
+    <span class="lb-value">{{ r[tab] }}{{ unit }}</span>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+  document.querySelectorAll('.lb-bar-fill').forEach(el => {
+    const pct = el.getAttribute('data-fill');
+    requestAnimationFrame(() => { el.style.width = pct + '%'; });
+  });
+</script>
+{% else %}
+<div class="empty-state-card"><h3>No one to rank yet</h3><p>Once your department has members with activity, they'll show up here.</p></div>
+{% endif %}
+{% endblock %}

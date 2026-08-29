@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit department' if department else 'Add department' }} - PCES{% endblock %}
+{% block page_title %}{{ 'Edit department' if department else 'Add department' }}{% endblock %}
+{% block content %}
+
+<div class="form-panel">
+  {% if error %}<p style="color:var(--hc-red); font-weight:700; margin-bottom:14px;">{{ error }}</p>{% endif %}
+  <form method="POST" class="form-card">
+    <label>Department name
+      <input type="text" name="name" value="{{ department.name if department else '' }}" placeholder="e.g. Computer Science - Tier 1 - Boys" required>
+    </label>
+    <label>Discord channel ID (optional)
+      <input type="text" name="discord_channel_id" value="{{ department.discord_channel_id if department else '' }}" placeholder="e.g. 123456789012345678">
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save department</button>
+      <a href="{{ url_for('departments.list_departments') }}" class="btn">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

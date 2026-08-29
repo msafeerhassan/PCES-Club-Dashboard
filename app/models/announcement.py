@@ -10,5 +10,7 @@ class Announcement(db.Model):
     body = db.Column(db.Text, nullable=False)
     created_by_id = db.Column(db.Integer, db.ForeignKey("members.id"), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    is_club_wide = db.Column(db.Boolean, nullable=False, default=True)
 
     created_by = db.relationship("Member")
+    departments = db.relationship("Department", secondary="announcement_departments", backref="announcements")

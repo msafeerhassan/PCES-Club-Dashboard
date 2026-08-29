@@ -1,14 +1,11 @@
 from datetime import datetime, timedelta
 from app.models.event import Event
 from app.models.submission import Submission
-from app.models.enums import EventScopeEnum
 
 
 def get_eligible_events(member):
-    return [
-        e for e in Event.query.all()
-        if e.scope == EventScopeEnum.CLUB_WIDE or (member.section and e.scope.value == member.section.value)
-    ]
+    from app.utils.permissions import can_view_event
+    return [e for e in Event.query.all() if can_view_event(member, e)]
 
 
 def get_upcoming_events(member, limit=5):
@@ -44,8 +41,12 @@ def get_pending_tasks(member, previous_login=None):
 
 def get_peer_members(member):
     from app.models.member import Member
+    from app.models.department import Department
     from app.models.enums import RoleEnum
 
-    if member.section is not None:
-        return Member.query.filter_by(section=member.section, role=RoleEnum.MEMBER).all()
+    dept_ids = [d.id for d in member.departments]
+    if dept_ids:
+        return Member.query.filter(
+            Member.departments.any(Department.id.in_(dept_ids)), Member.role == RoleEnum.MEMBER
+        ).all()
     return Member.query.filter_by(role=RoleEnum.MEMBER).all()

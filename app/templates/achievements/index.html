@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Achievements - PCES{% endblock %}
+{% block page_title %}Achievements{% endblock %}
+{% block content %}
+
+<div class="achievement-grid">
+  {% for a in achievements %}
+  <div class="achievement-badge {{ 'earned' if a.id in earned_ids else 'locked' }} ach-{{ a.color }}">
+    <span class="achievement-glyph">{{ a.glyph }}</span>
+    <span class="achievement-name">{{ a.name }}</span>
+    <span class="achievement-desc">{{ a.description }}</span>
+    {% if a.id in earned_ids %}<span class="badge badge-success" style="margin-top:8px;">Earned</span>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

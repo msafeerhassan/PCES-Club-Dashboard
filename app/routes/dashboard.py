@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, session as flask_session
 from flask_login import login_required, current_user
 from datetime import datetime
 from app.extensions import oauth
-from app.utils.permissions import visible_sections, is_read_only_admin, ADMIN_ROLES
+from app.utils.permissions import visible_departments, is_read_only_admin, ADMIN_ROLES
 from app.utils.dashboard_helpers import get_pending_tasks, get_upcoming_events
 from app.routes.admin import build_summary_data
 from app.utils.hackatime_client import get_weekly_trend
@@ -14,7 +14,7 @@ dashboard_bp = Blueprint("dashboard", __name__, url_prefix="/dashboard")
 @dashboard_bp.route("/")
 @login_required
 def index():
-    sections = visible_sections(current_user)
+    departments = visible_departments(current_user)
     connection = current_user.hackatime_connection
 
     recent_seconds = None
@@ -34,12 +34,14 @@ def index():
         admin_summary = build_summary_data(current_user)
 
     weekly_trend = get_weekly_trend(oauth, connection) if connection else []
-    recent_announcements = Announcement.query.order_by(Announcement.created_at.desc()).limit(3).all()
+    from app.utils.permissions import can_view_announcement
 
+    all_announcements = Announcement.query.order_by(Announcement.created_at.desc()).all()
+    recent_announcements = [a for a in all_announcements if can_view_announcement(current_user, a)][:3]
     return render_template(
         "dashboard/index.html",
         member=current_user,
-        sections=sections,
+        departments=departments,
         read_only=is_read_only_admin(current_user),
         hackatime_connected=connection is not None,
         recent_seconds=recent_seconds,
