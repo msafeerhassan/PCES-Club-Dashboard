@@ -1,11 +1,14 @@
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from flask import Flask
+from werkzeug.middleware.proxy_fix import ProxyFix
 from app.config import Config
 from app.extensions import db, login_manager, oauth
 
-
 def create_app():
+    app = Flask(__name__)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
     if Config.SENTRY_DSN:
         sentry_sdk.init(
             dsn=Config.SENTRY_DSN,
@@ -14,7 +17,6 @@ def create_app():
             environment="development",
         )
 
-    app = Flask(__name__)
     app.config.from_object(Config)
 
     db.init_app(app)
