@@ -4,6 +4,7 @@ from app.extensions import db
 from app.models.member import Member
 from app.models.submission import Submission
 from app.models.attendance import Attendance
+from app.extensions import oauth
 from app.models.enums import RoleEnum
 from app.utils.permissions import (
     admin_required,

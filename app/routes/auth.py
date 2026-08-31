@@ -1,5 +1,5 @@
 from flask import Blueprint, redirect, url_for
-from flask_login import login_user, logout_user, login_required
+from flask_login import current_user, login_user, logout_user, login_required
 from app.extensions import oauth, db
 from app.models.member import Member
 
@@ -14,7 +14,14 @@ def login():
 
 @auth_bp.route("/hca/callback")
 def hca_callback():
-    token = oauth.hca.authorize_access_token()
+    from authlib.integrations.base_client.errors import OAuthError
+
+    try:
+        token = oauth.hca.authorize_access_token()
+    except OAuthError:
+        if current_user.is_authenticated:
+            return redirect(url_for("dashboard.index"))
+        return redirect(url_for("main.home", login_error="1"))
     resp = oauth.hca.get("api/v1/me", token=token)
     data = resp.json()
     identity = data["identity"]

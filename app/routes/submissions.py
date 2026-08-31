@@ -173,7 +173,7 @@ def feature_submission(submission_id):
 
     submission = Submission.query.get_or_404(submission_id)
 
-    if not can_manage_member(current_user, submission.member):
+    if not can_manage_submission(current_user, submission.member):
         abort(403)
 
     if submission.status != SubmissionStatus.APPROVED:
@@ -206,12 +206,8 @@ def feature_submission(submission_id):
 @submissions_bp.route("/<int:submission_id>/unfeature", methods=["POST"])
 @login_required
 def unfeature_submission(submission_id):
-    if current_user.role.value not in ("president", "vp_boys", "vp_girls"):
-        abort(403)
-
     submission = Submission.query.get_or_404(submission_id)
-
-    if not can_manage_member(current_user, submission.member):
+    if not can_manage_submission(current_user, submission):
         abort(403)
 
     submission.is_featured = False

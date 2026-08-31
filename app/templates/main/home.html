@@ -22,6 +22,9 @@
       <h1 class="hero-title">The internal hub for <span class="accent">everything PCES does.</span></h1>
       <p class="hero-sub">Track coding activity, ship projects, manage events and attendance — one dashboard built specifically for how PCES runs, section by section.</p>
       <div class="hero-cta">
+        {% if request.args.get('login_error') %}
+<p style="color:var(--hc-red); font-weight:700; margin-bottom:12px;">Login didn't go through — please try again.</p>
+{% endif %}
         <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Log in with Hack Club Auth</a>
         <a href="#features" class="btn">See what it does</a>
       </div>
