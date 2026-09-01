@@ -34,8 +34,13 @@
         {% endif %}
       </div>
       <div class="event-card-actions">
-        <a href="{{ url_for('events.edit_event', event_id=e.id) }}">Edit</a>
-        <a href="{{ url_for('attendance.mark_attendance', event_id=e.id) }}">Attendance</a>
+      <a href="{{ url_for('events.edit_event', event_id=e.id) }}">Edit</a>
+      <a href="{{ url_for('attendance.mark_attendance', event_id=e.id) }}">Attendance</a>
+      {% if can_manage_event(current_user, e) %}
+      <form method="POST" action="{{ url_for('events.delete_event', event_id=e.id) }}" class="inline-form" onsubmit="return confirm('Delete this event? Its attendance records will be deleted too. Linked submissions will become standalone, not deleted.');">
+        <button type="submit" class="btn btn-small">Delete</button>
+      </form>
+      {% endif %}
       </div>
     </div>
   </div>

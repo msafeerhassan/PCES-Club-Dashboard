@@ -25,8 +25,9 @@ def create_app():
 
     login_manager.login_view = "auth.login"
 
-    from app.utils.permissions import department_names_for_viewer
+    from app.utils.permissions import department_names_for_viewer, can_manage_event
     app.jinja_env.globals["dept_names_for_viewer"] = department_names_for_viewer
+    app.jinja_env.globals["can_manage_event"] = can_manage_event
     from app import models  # noqa: F401 -- registers models with SQLAlchemy
     from app import utils  # noqa: F401
     from app.utils.login import load_user  # noqa: F401 -- registers user_loader

@@ -13,7 +13,7 @@ class Event(db.Model):
     event_date = db.Column(db.Date, nullable=False)
     submission_deadline = db.Column(db.DateTime, nullable=True)
 
-    created_by_id = db.Column(db.Integer, db.ForeignKey("members.id"), nullable=False)
+    created_by_id = db.Column(db.Integer, db.ForeignKey("members.id"), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     created_by = db.relationship("Member")

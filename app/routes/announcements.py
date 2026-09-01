@@ -59,3 +59,16 @@ def new_announcement():
         return redirect(url_for("announcements.list_announcements"))
 
     return render_template("announcements/form.html", departments=departments, error=None)
+
+@announcements_bp.route("/<int:announcement_id>/delete", methods=["POST"])
+@login_required
+def delete_announcement(announcement_id):
+    from app.utils.permissions import can_manage_announcement
+
+    announcement = Announcement.query.get_or_404(announcement_id)
+    if not can_manage_announcement(current_user, announcement):
+        abort(403)
+
+    db.session.delete(announcement)
+    db.session.commit()
+    return redirect(url_for("announcements.list_announcements"))

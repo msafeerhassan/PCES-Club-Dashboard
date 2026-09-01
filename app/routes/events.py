@@ -11,6 +11,9 @@ from app.utils.permissions import (
     assignable_event_departments,
 )
 
+from app.models.attendance import Attendance
+from app.models.submission import Submission
+
 events_bp = Blueprint("events", __name__, url_prefix="/events")
 
 
@@ -106,3 +109,17 @@ def edit_event(event_id):
         return redirect(url_for("events.list_events"))
 
     return render_template("events/form.html", departments=departments, event=event, error=None)
+
+@events_bp.route("/<int:event_id>/delete", methods=["POST"])
+@login_required
+@admin_required
+def delete_event(event_id):
+    event = Event.query.get_or_404(event_id)
+    if not can_manage_event(current_user, event):
+        abort(403)
+
+    Attendance.query.filter_by(event_id=event.id).delete()
+    Submission.query.filter_by(event_id=event.id).update({"event_id": None})
+    db.session.delete(event)
+    db.session.commit()
+    return redirect(url_for("events.list_events"))

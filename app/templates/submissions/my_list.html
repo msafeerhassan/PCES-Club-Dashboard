@@ -28,6 +28,9 @@
     {% if s.feedback %}<p style="font-size:12.5px; color:var(--hc-red); margin-top:-4px;">{{ s.feedback }}</p>{% endif %}
     <a href="{{ url_for('submissions.edit_submission', submission_id=s.id) }}" class="btn btn-small" style="width:fit-content;">Fix & resubmit</a>
     {% endif %}
+    <form method="POST" action="{{ url_for('submissions.delete_submission', submission_id=s.id) }}" class="inline-form" onsubmit="return confirm('Delete this submission permanently?');">
+      <button type="submit" class="btn btn-small" style="width:fit-content; margin-bottom:8px;">Delete</button>
+    </form>
     <div class="submission-card-links">
       {% if s.demo_url %}<a href="{{ s.demo_url }}" target="_blank" rel="noopener noreferrer">Demo</a>{% endif %}
       {% if s.github_url %}<a href="{{ s.github_url }}" target="_blank" rel="noopener noreferrer">GitHub</a>{% endif %}

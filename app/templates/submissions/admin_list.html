@@ -63,6 +63,10 @@
     </div>
     {% endif %}
 
+    <form method="POST" action="{{ url_for('submissions.delete_submission', submission_id=s.id) }}" class="inline-form" onsubmit="return confirm('Delete this submission permanently?');" style="margin-bottom:10px;">
+      <button type="submit" class="btn btn-small">Delete</button>
+    </form>
+
     <div class="admin-sub-footer">
       <span class="admin-sub-date">{{ s.submitted_at.strftime('%b %d, %Y') }}</span>
       {% if s.status.value == 'approved' %}

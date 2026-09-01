@@ -328,3 +328,47 @@ def department_health():
     }
 
     return render_template("admin/department_health.html", available=available, selected=selected, data=data)
+
+@admin_bp.route("/members/<int:member_id>/delete", methods=["POST"])
+@login_required
+@admin_required
+def member_delete(member_id):
+    from app.models.attendance import Attendance
+    from app.models.submission import Submission
+    from app.models.submission_file import SubmissionFile
+    from app.models.submission_screenshot import SubmissionScreenshot
+    from app.models.hackatime_connection import HackatimeConnection
+    from app.models.member_achievement import MemberAchievement
+    from app.models.event import Event
+    from app.models.announcement import Announcement
+    from app.models.resource import Resource
+
+    member = Member.query.get_or_404(member_id)
+
+    if not can_manage_member(current_user, member):
+        abort(403)
+    if member.id == current_user.id:
+        abort(403)
+
+    # Delete what's genuinely theirs
+    for submission in Submission.query.filter_by(member_id=member.id).all():
+        SubmissionFile.query.filter_by(submission_id=submission.id).delete()
+        SubmissionScreenshot.query.filter_by(submission_id=submission.id).delete()
+        db.session.delete(submission)
+
+    Attendance.query.filter_by(member_id=member.id).delete()
+    HackatimeConnection.query.filter_by(member_id=member.id).delete()
+    MemberAchievement.query.filter_by(member_id=member.id).delete()
+
+    # Detach references where they were only involved, not the owner
+    Attendance.query.filter_by(marked_by_id=member.id).update({"marked_by_id": None})
+    Submission.query.filter_by(reviewed_by_id=member.id).update({"reviewed_by_id": None})
+    MemberAchievement.query.filter_by(awarded_by_id=member.id).update({"awarded_by_id": None})
+    Event.query.filter_by(created_by_id=member.id).update({"created_by_id": None})
+    Announcement.query.filter_by(created_by_id=member.id).update({"created_by_id": None})
+    Resource.query.filter_by(created_by_id=member.id).update({"created_by_id": None})
+
+    member.departments = []
+    db.session.delete(member)
+    db.session.commit()
+    return redirect(url_for("admin.members_list"))

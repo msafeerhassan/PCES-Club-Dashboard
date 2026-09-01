@@ -16,6 +16,11 @@
 {% set rest = items[1:] %}
 
 <div class="announcement-featured">
+    {% if current_user.role.value == 'president' or (current_user.role.value == 'department_admin' and not latest.is_club_wide) %}
+    <form method="POST" action="{{ url_for('announcements.delete_announcement', announcement_id=latest.id) }}" class="inline-form" onsubmit="return confirm('Delete this announcement permanently?');" style="float:right;">
+      <button type="submit" class="btn btn-small">Delete</button>
+    </form>
+    {% endif %}
   <span class="announcement-featured-badge">Latest</span>
   <h2>{{ latest.title }}</h2>
   <p>{{ latest.body }}</p>
@@ -43,6 +48,11 @@
       {% endif %}
     </div>
     <span class="announcement-meta">{{ a.created_at.strftime('%b %d, %Y') }}</span>
+    {% if current_user.role.value == 'president' or (current_user.role.value == 'department_admin' and not a.is_club_wide) %}
+    <form method="POST" action="{{ url_for('announcements.delete_announcement', announcement_id=a.id) }}" class="inline-form" onsubmit="return confirm('Delete this announcement permanently?');">
+      <button type="submit" class="btn btn-small" style="margin-top:8px;">Delete</button>
+    </form>
+    {% endif %}
   </div>
   {% endfor %}
 </div>

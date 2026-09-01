@@ -298,3 +298,21 @@ def edit_submission(submission_id):
         return redirect(url_for("submissions.my_submissions"))
 
     return render_template("submissions/edit.html", submission=submission, hackatime_projects=hackatime_projects)
+
+@submissions_bp.route("/<int:submission_id>/delete", methods=["POST"])
+@login_required
+def delete_submission(submission_id):
+    submission = Submission.query.get_or_404(submission_id)
+
+    is_owner = submission.member_id == current_user.id
+    if not is_owner and not can_manage_submission(current_user, submission):
+        abort(403)
+
+    SubmissionFile.query.filter_by(submission_id=submission.id).delete()
+    SubmissionScreenshot.query.filter_by(submission_id=submission.id).delete()
+    db.session.delete(submission)
+    db.session.commit()
+
+    if is_owner and not can_manage_submission(current_user, submission):
+        return redirect(url_for("submissions.my_submissions"))
+    return redirect(url_for("submissions.all_submissions"))
