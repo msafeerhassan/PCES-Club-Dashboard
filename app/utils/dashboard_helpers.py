@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from app.models.event import Event
 from app.models.submission import Submission
-
+from app.utils.timeutil import club_now
 
 def get_eligible_events(member):
     from app.utils.permissions import can_view_event
@@ -9,7 +9,7 @@ def get_eligible_events(member):
 
 
 def get_upcoming_events(member, limit=5):
-    today = datetime.utcnow().date()
+    today = club_now().date()
     events = [e for e in get_eligible_events(member) if e.event_date >= today]
     events.sort(key=lambda e: e.event_date)
     return events[:limit]
@@ -25,7 +25,7 @@ def get_pending_tasks(member, previous_login=None):
     submitted_event_ids = {
         s.event_id for s in Submission.query.filter_by(member_id=member.id).all() if s.event_id
     }
-    now = datetime.utcnow()
+    now = club_now()
     for e in eligible:
         if e.submission_deadline and e.id not in submitted_event_ids:
             time_left = e.submission_deadline - now
@@ -36,6 +36,17 @@ def get_pending_tasks(member, previous_login=None):
         new_events = [e for e in eligible if e.created_at > previous_login]
         for e in new_events:
             tasks.append(f"New event: '{e.title}'")
+
+    from app.models.challenge import Challenge
+    from app.utils.challenge_helpers import get_member_challenge_state
+    from app.utils.permissions import can_view_challenge
+    now_local = club_now()
+    for c in Challenge.query.filter(Challenge.deadline >= now_local).order_by(Challenge.deadline).all():
+        if not can_view_challenge(member, c):
+            continue
+        st = get_member_challenge_state(member, c)
+        if st["state"] == "open" and st["can_submit"] and (c.deadline - now_local) <= timedelta(days=3):
+            tasks.append(f"Challenge due soon: '{c.title}' ({st['time_left']})")
 
     return tasks
 

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width:480px;margin:60px auto;text-align:center;padding:40px 28px;">
+  <div style="font-size:56px;font-weight:800;color:var(--hc-red);line-height:1;">{{ code }}</div>
+  <h2 style="margin:12px 0 6px;">{{ title }}</h2>
+  <p style="color:var(--muted);margin-bottom:20px;">{{ message }}</p>
+  <a class="btn" href="{{ url_for('dashboard.index') if current_user.is_authenticated else url_for('main.home') }}">Go back</a>
+</div>
+{% endblock %}

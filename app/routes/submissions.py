@@ -11,6 +11,7 @@ from app.models.submission_screenshot import SubmissionScreenshot
 from app.models.enums import SubmissionStatus
 from datetime import datetime, date
 from app.models.department import Department
+from app.utils.timeutil import club_now
 
 submissions_bp = Blueprint("submissions", __name__, url_prefix="/submissions")
 
@@ -29,7 +30,7 @@ def new_submission():
     from app.utils.dashboard_helpers import get_eligible_events
     eligible_events = get_eligible_events(current_user)
     eligible_events_annotated = [
-        (e, e.submission_deadline is not None and datetime.utcnow() > e.submission_deadline)
+        (e, e.submission_deadline is not None and club_now() > e.submission_deadline)
         for e in eligible_events
     ]
 

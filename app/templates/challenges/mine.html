@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}My Challenge Results - PCES{% endblock %}
+{% block page_title %}My challenge results{% endblock %}
+{% block content %}
+
+<div class="stat-grid" style="margin-bottom:20px;">
+  <div class="stat-card"><span class="stat-value" data-countup="{{ total_points }}">0</span><span class="stat-label">Total points</span></div>
+  <div class="stat-card"><span class="stat-value" data-countup="{{ judged_count }}">0</span><span class="stat-label">Challenges scored</span></div>
+  <div class="stat-card"><span class="stat-value">{{ average if average is not none else '-' }}</span><span class="stat-label">Average score</span></div>
+  <div class="stat-card"><span class="stat-value" data-countup="{{ streak }}">0</span><span class="stat-label">Week streak</span></div>
+</div>
+
+{% if submissions %}
+<div class="result-list">
+  {% for s in submissions %}
+  <article class="result-card">
+    <div class="result-head">
+      <div>
+        <h3 class="challenge-title">{{ s.challenge.title }}</h3>
+        <div class="event-card-badges" style="margin-top:8px;">
+          <span class="badge">{{ s.challenge.technology }}</span>
+          <span class="badge badge-blue">{{ s.department.name }}</span>
+          {% if s.is_late %}<span class="badge badge-danger">Late</span>{% endif %}
+        </div>
+      </div>
+      {% if s.is_judged %}
+      <div class="result-score"><strong>{{ s.total_score }}</strong><span>/ 20</span></div>
+      {% else %}
+      <span class="countdown-chip chip-done">Awaiting judging</span>
+      {% endif %}
+    </div>
+
+    {% if s.is_judged %}
+    <div class="score-rows">
+      {% for label, value in [('Functionality', s.functionality_score), ('Complexity', s.complexity_score), ('Creativity', s.creativity_score), ('Quality & Design', s.quality_score)] %}
+      <div class="score-row">
+        <span class="score-label">{{ label }}</span>
+        <div class="score-meter">{% for i in range(5) %}<span class="{{ 'on' if i < value else '' }}"></span>{% endfor %}</div>
+        <span class="score-num">{{ value }}/5</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% if s.is_late %}
+    <p class="penalty-note">{{ 'Late penalty waived by the judge.' if s.late_penalty_waived else 'Late penalty applied: −2 points.' }}</p>
+    {% endif %}
+    {% if s.judge_feedback %}
+    <div class="feedback-box"><p class="brief-label">Judge feedback</p><p>{{ s.judge_feedback }}</p></div>
+    {% endif %}
+    {% else %}
+    <p class="brief-text">You can keep updating this submission until it's judged.</p>
+    {% endif %}
+
+    <div class="challenge-footer">
+      <span class="admin-sub-date">Submitted {{ s.submitted_at.strftime('%b %d, %H:%M') }}</span>
+      <div class="challenge-actions">
+        {% if s.github_url %}<a href="{{ s.github_url }}" target="_blank" rel="noopener noreferrer" class="link-chip">GitHub</a>{% endif %}
+        {% if s.demo_url %}<a href="{{ s.demo_url }}" target="_blank" rel="noopener noreferrer" class="link-chip">Demo</a>{% endif %}
+        {% for f in s.files %}<a href="{{ f.file_url }}" target="_blank" rel="noopener noreferrer" class="link-chip" title="{{ f.file_name }}">File {{ loop.index }}</a>{% endfor %}
+        {% if not s.is_judged %}
+        <a href="{{ url_for('challenge_submissions.submit', challenge_id=s.challenge_id) }}" class="btn btn-small">Update</a>
+        {% endif %}
+      </div>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state-card">
+  <h3>No challenge submissions yet</h3>
+  <p>Open a challenge and submit your work to start building your score.</p>
+  <a href="{{ url_for('challenges.list_challenges') }}" class="btn btn-primary" style="margin-top:12px;">View challenges</a>
+</div>
+{% endif %}
+{% endblock %}

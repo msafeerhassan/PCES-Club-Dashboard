@@ -44,6 +44,24 @@
   </div>
 </div>
 
+<div class="health-grid">
+  <div class="health-card">
+    <div class="health-card-label">Challenge points</div>
+    <div class="health-card-value" data-countup="{{ data.challenge_points }}">0</div>
+    <div class="health-card-sub">total scored</div>
+  </div>
+  <div class="health-card">
+    <div class="health-card-label">Average score</div>
+    <div class="health-card-value">{{ data.challenge_avg if data.challenge_avg is not none else '-' }}</div>
+    <div class="health-card-sub">out of 20</div>
+  </div>
+  <div class="health-card">
+    <div class="health-card-label">Awaiting judging</div>
+    <div class="health-card-value" data-countup="{{ data.challenge_pending }}">0</div>
+    <div class="health-card-sub">challenge submissions</div>
+  </div>
+</div>
+
 <div class="card">
   <div class="card-head"><span class="card-icon" style="background:var(--hc-red);">▲</span><h2>Top contributors</h2></div>
   {% if data.top_contributors %}

@@ -5,7 +5,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from app.config import Config
 from app.extensions import db, login_manager, oauth
 
-def create_app():
+def create_app(config_override=None):
     app = Flask(__name__)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
@@ -25,9 +25,10 @@ def create_app():
 
     login_manager.login_view = "auth.login"
 
-    from app.utils.permissions import department_names_for_viewer, can_manage_event
+    from app.utils.permissions import department_names_for_viewer, can_manage_event, can_manage_challenge
     app.jinja_env.globals["dept_names_for_viewer"] = department_names_for_viewer
     app.jinja_env.globals["can_manage_event"] = can_manage_event
+    app.jinja_env.globals["can_manage_challenge"] = can_manage_challenge
     from app import models  # noqa: F401 -- registers models with SQLAlchemy
     from app import utils  # noqa: F401
     from app.utils.login import load_user  # noqa: F401 -- registers user_loader
@@ -52,6 +53,12 @@ def create_app():
     from app.routes.departments import departments_bp
     from app.routes.leaderboard import leaderboard_bp
     from app.routes.achievements import achievements_bp
+    from app.routes.challenges import challenges_bp
+    from app.routes.challenge_submissions import challenge_submissions_bp
+    from app.routes.challenge_judging import challenge_judging_bp
+    from app.routes.challenge_leaderboard import challenge_leaderboard_bp
+    from app.routes.department_rankings import department_rankings_bp
+    from app.routes.internal_cron import internal_cron_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -69,5 +76,11 @@ def create_app():
     app.register_blueprint(departments_bp)
     app.register_blueprint(leaderboard_bp)
     app.register_blueprint(achievements_bp)
+    app.register_blueprint(challenges_bp)
+    app.register_blueprint(challenge_submissions_bp)
+    app.register_blueprint(challenge_judging_bp)
+    app.register_blueprint(challenge_leaderboard_bp)
+    app.register_blueprint(department_rankings_bp)
+    app.register_blueprint(internal_cron_bp)
 
     return app

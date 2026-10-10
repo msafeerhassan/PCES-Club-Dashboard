@@ -153,3 +153,41 @@ def can_manage_announcement(actor, announcement):
     actor_ids = {d.id for d in actor.departments}
     ann_ids = {d.id for d in announcement.departments}
     return bool(actor_ids & ann_ids)
+
+def can_manage_challenge(actor, challenge):
+    if actor.role == RoleEnum.PRESIDENT:
+        return True
+    if actor.role != RoleEnum.DEPARTMENT_ADMIN:
+        return False
+    if challenge.is_club_wide:
+        return False
+    actor_ids = {d.id for d in actor.departments}
+    challenge_ids = {d.id for d in challenge.departments}
+    return bool(actor_ids & challenge_ids)
+
+
+def can_view_challenge(member, challenge):
+    if challenge.is_club_wide:
+        return True
+    if member.role in VIEW_ALL_ROLES:
+        return True
+    member_ids = {d.id for d in member.departments}
+    challenge_ids = {d.id for d in challenge.departments}
+    return bool(member_ids & challenge_ids)
+
+def can_manage_challenge_submission(actor, submission):
+    if actor.role == RoleEnum.PRESIDENT:
+        return True
+    if actor.role != RoleEnum.DEPARTMENT_ADMIN:
+        return False
+    return submission.department in actor.departments
+
+
+def can_view_challenge_submission(actor, submission):
+    if actor.role in VIEW_ALL_ROLES:
+        return True
+    if actor.id == submission.member_id:
+        return True
+    if actor.role != RoleEnum.DEPARTMENT_ADMIN:
+        return False
+    return submission.department in actor.departments

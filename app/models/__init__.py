@@ -10,4 +10,8 @@ from app.models.resource import Resource
 from app.models.associations import member_departments, event_departments, announcement_departments
 from app.models.department import Department
 from app.models.achievement import Achievement
+from app.models.challenge import Challenge
+from app.models.challenge_submission import ChallengeSubmission
+from app.models.challenge_submission_file import ChallengeSubmissionFile
+from app.models.rank_snapshot import ChallengeRankSnapshot, DepartmentRankSnapshot
 from app.models.member_achievement import MemberAchievement

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Submit: {{ challenge.title }}{% endblock %}
+{% block page_title %}{{ 'Update your submission' if existing else 'Submit your challenge' }}{% endblock %}
+{% block content %}
+
+<div class="challenge-submit-grid">
+  <aside class="challenge-brief">
+    <span class="challenge-theme">{{ challenge.theme }}</span>
+    <h2 class="brief-title">{{ challenge.title }}</h2>
+    <div class="event-card-badges"><span class="badge">{{ challenge.technology }}</span></div>
+
+    <p class="brief-label">Objective</p>
+    <p class="brief-text">{{ challenge.objective }}</p>
+
+    <p class="brief-label">Submission requirements</p>
+    <p class="brief-text">{{ challenge.submission_requirements }}</p>
+
+    <p class="brief-label">Deadline (Pakistan time)</p>
+    <p class="brief-text"><strong>{{ challenge.deadline.strftime('%A, %B %d at %H:%M') }}</strong></p>
+
+    {% if will_be_late %}
+    <div class="late-banner">This submission will be marked late. A 2-point penalty applies unless a judge waives it for a valid reason.</div>
+    {% endif %}
+  </aside>
+
+  <form method="POST" enctype="multipart/form-data" class="form-panel challenge-submit-form">
+    <div class="form-card">
+      {% if error %}<p style="color:var(--hc-red); font-weight:700;">{{ error }}</p>{% endif %}
+
+      {% if eligible_departments | length > 1 %}
+      <label>Which department is this for?
+        <select name="department_id" required>
+          <option value="">-- select --</option>
+          {% for d in eligible_departments %}
+          <option value="{{ d.id }}" {{ 'selected' if existing and existing.department_id == d.id else '' }}>{{ d.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      {% endif %}
+
+      <div class="form-row-2">
+        <label>GitHub URL <input type="url" name="github_url" value="{{ existing.github_url if existing and existing.github_url else '' }}"></label>
+        <label>Demo / executable URL <input type="url" name="demo_url" value="{{ existing.demo_url if existing and existing.demo_url else '' }}"></label>
+      </div>
+
+      <label>Hackatime project
+        <select name="hackatime_project_name">
+          <option value="">-- none --</option>
+          {% for p in hackatime_projects %}
+          <option value="{{ p }}" {{ 'selected' if existing and p == existing.hackatime_project_name else '' }}>{{ p }}</option>
+          {% endfor %}
+        </select>
+        <span class="field-hint">Judges use this as evidence the work happened during the week. It never affects your score.</span>
+      </label>
+
+      <label>Files (CAD files, screenshots, executables)
+        <div class="file-input-wrap"><input type="file" name="files" multiple></div>
+        {% if existing and existing.files %}
+        <span class="field-hint">{{ existing.files | length }} file(s) already attached. New uploads are added to them.</span>
+        {% endif %}
+      </label>
+
+      {% if will_be_late %}
+      <label>Reason for late submission (optional)
+        <textarea name="late_reason">{{ existing.late_reason if existing and existing.late_reason else '' }}</textarea>
+      </label>
+      {% endif %}
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">{{ 'Update submission' if existing else 'Submit' }}</button>
+        <a href="{{ url_for('challenges.list_challenges') }}" class="btn">Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

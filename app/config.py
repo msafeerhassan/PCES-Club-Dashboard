@@ -28,3 +28,8 @@ class Config:
     DISCORD_BOT_TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
     DISCORD_CLUBWIDE_CHANNEL_ID = os.environ.get("DISCORD_CLUBWIDE_CHANNEL_ID")
     SENTRY_DSN = os.environ.get("SENTRY_DSN")
+    CRON_SECRET = os.environ.get("CRON_SECRET")
+
+    MAX_CONTENT_LENGTH = 4 * 1024 * 1024   # Vercel rejects >4.5 MB anyway
+    WTF_CSRF_TIME_LIMIT = None             # token lives as long as the session
+    SESSION_COOKIE_HTTPONLY = True

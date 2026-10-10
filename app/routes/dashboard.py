@@ -29,6 +29,17 @@ def index():
     pending_tasks = get_pending_tasks(current_user, previous_login)
     upcoming_events = get_upcoming_events(current_user)
 
+    from app.models.challenge import Challenge
+    from app.utils.permissions import can_view_challenge
+    from app.utils.challenge_helpers import get_member_challenge_state
+    from app.utils.timeutil import club_now
+
+    active_challenges = []
+    for c in Challenge.query.filter(Challenge.deadline >= club_now()).order_by(Challenge.deadline).all():
+        if can_view_challenge(current_user, c):
+            active_challenges.append({"challenge": c, "state": get_member_challenge_state(current_user, c)})
+    active_challenges = active_challenges[:2]
+
     admin_summary = None
     if current_user.role in ADMIN_ROLES:
         admin_summary = build_summary_data(current_user)
@@ -50,4 +61,5 @@ def index():
         admin_summary=admin_summary,
         weekly_trend=weekly_trend,
         recent_announcements=recent_announcements,
+        active_challenges=active_challenges,
     )

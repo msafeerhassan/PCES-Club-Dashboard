@@ -1,7 +1,9 @@
 from datetime import datetime
 from app.extensions import db
 from app.models.enums import SubmissionStatus
+from app.utils.timeutil import club_now
 
+submitted_at = db.Column(db.DateTime, default=club_now, nullable=False)
 
 class Submission(db.Model):
     __tablename__ = "submissions"
@@ -17,7 +19,8 @@ class Submission(db.Model):
     demo_url = db.Column(db.String(500), nullable=True)
     github_url = db.Column(db.String(500), nullable=True)
 
-    submitted_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    submitted_at = db.Column(db.DateTime, default=club_now, nullable=False)
+
     is_featured = db.Column(db.Boolean, default=False, nullable=False)
 
     status = db.Column(db.Enum(SubmissionStatus), nullable=False, default=SubmissionStatus.PENDING)

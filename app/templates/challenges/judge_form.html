@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Judge: {{ submission.member.name }}{% endblock %}
+{% block page_title %}Judge submission{% endblock %}
+{% block content %}
+
+{% macro rubric_row(name, label, desc, current) %}
+<div class="rubric-row">
+  <div class="rubric-text">
+    <span class="rubric-name">{{ label }}</span>
+    <span class="rubric-desc">{{ desc }}</span>
+  </div>
+  <div class="score-picker">
+    {% for i in range(6) %}
+    <label>
+      <input type="radio" name="{{ name }}" value="{{ i }}" {{ 'checked' if current is not none and current == i else '' }} required>
+      <span>{{ i }}</span>
+    </label>
+    {% endfor %}
+  </div>
+</div>
+{% endmacro %}
+
+<div class="judge-grid">
+  <section>
+    <div class="card">
+      <div class="member-chip" style="margin-bottom:12px;">
+        <span class="member-avatar">{{ submission.member.name[0] }}</span>
+        <div>
+          <div style="font-weight:800; color:var(--ink);">{{ submission.member.name }}</div>
+          <span class="badge badge-blue">{{ submission.department.name }}</span>
+        </div>
+      </div>
+
+      <p class="brief-label">Challenge</p>
+      <p class="brief-text"><strong>{{ submission.challenge.title }}</strong> · {{ submission.challenge.technology }}</p>
+      <p class="brief-label">Requirements</p>
+      <p class="brief-text">{{ submission.challenge.submission_requirements }}</p>
+      <p class="brief-label">Submitted</p>
+      <p class="brief-text">{{ submission.submitted_at.strftime('%b %d, %H:%M') }} {% if submission.is_late %}<span class="badge badge-danger">Late</span>{% endif %}</p>
+
+      {% if submission.is_late and submission.late_reason %}
+      <div class="feedback-box" style="margin-top:12px;"><p class="brief-label">Reason given for lateness</p><p>{{ submission.late_reason }}</p></div>
+      {% endif %}
+
+      <div class="link-chips" style="margin-top:14px;">
+        {% if submission.github_url %}<a href="{{ submission.github_url }}" target="_blank" rel="noopener noreferrer" class="link-chip">GitHub</a>{% endif %}
+        {% if submission.demo_url %}<a href="{{ submission.demo_url }}" target="_blank" rel="noopener noreferrer" class="link-chip">Demo</a>{% endif %}
+        {% for f in submission.files %}<a href="{{ f.file_url }}" target="_blank" rel="noopener noreferrer" class="link-chip" title="{{ f.file_name }}">File {{ loop.index }}</a>{% endfor %}
+        {% if not submission.github_url and not submission.demo_url and not submission.files %}<span style="color:var(--muted); font-size:13px;">Nothing attached</span>{% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="card-icon" style="background:var(--hc-red);">⚡</span><h2>Hackatime evidence</h2></div>
+      {% if evidence %}
+      <div class="evidence-row">
+        <div class="aa-stat"><span class="aa-stat-value">{{ (evidence.total_seconds / 3600) | round(1) }}</span><span class="aa-stat-label">Project hours</span></div>
+        <div class="aa-stat"><span class="aa-stat-value">{{ evidence.languages | length }}</span><span class="aa-stat-label">Languages</span></div>
+      </div>
+      <div class="lang-badges" style="margin-bottom:10px;">{% for l in evidence.languages %}<span class="badge">{{ l }}</span>{% endfor %}</div>
+      {% if evidence_active is true %}
+      <span class="badge badge-success">Active since the challenge was released</span>
+      {% elif evidence_active is false %}
+      <span class="badge badge-warning">No activity since the challenge was released</span>
+      {% endif %}
+      {% elif submission.hackatime_project_name %}
+      <p style="font-size:13.5px; color:var(--slate);">The linked project "{{ submission.hackatime_project_name }}" wasn't found in this member's Hackatime account.</p>
+      {% else %}
+      <p style="font-size:13.5px; color:var(--slate);">No Hackatime project was linked to this submission.</p>
+      {% endif %}
+      <p class="field-hint" style="margin-top:10px;">Evidence only. Hackatime time never counts toward the score.</p>
+    </div>
+  </section>
+
+  <form method="POST" class="form-panel rubric-panel">
+    <div class="form-card">
+      {{ rubric_row('functionality_score', 'Functionality', 'Do the required features work, and is it actually usable?', submission.functionality_score) }}
+      {{ rubric_row('complexity_score', 'Complexity', 'Meaningful depth beyond the minimum, not unnecessary complexity.', submission.complexity_score) }}
+      {{ rubric_row('creativity_score', 'Creativity', 'How original is the solution and its take on the theme?', submission.creativity_score) }}
+      {{ rubric_row('quality_score', 'Quality & Design', 'Code quality, UI/UX, CAD modelling quality, overall polish.', submission.quality_score) }}
+
+      {% if submission.is_late %}
+      <label class="dept-picker-item" style="background:var(--fill); border-radius:10px; padding:10px 14px;">
+        <input type="checkbox" name="waive_penalty" id="waivePenalty" {{ 'checked' if submission.late_penalty_waived else '' }}>
+        Waive the 2-point late penalty (valid reason)
+      </label>
+      {% endif %}
+
+      <div class="live-total"><span>Total</span><strong><span id="liveTotal">0</span> / 20</strong></div>
+
+      <label>Feedback for the member
+        <textarea name="feedback">{{ submission.judge_feedback or '' }}</textarea>
+      </label>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save score</button>
+        <a href="{{ url_for('challenge_judging.judge_list') }}" class="btn">Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  (function () {
+    const isLate = {{ 'true' if submission.is_late else 'false' }};
+    const names = ['functionality_score', 'complexity_score', 'creativity_score', 'quality_score'];
+    const waive = document.getElementById('waivePenalty');
+    const out = document.getElementById('liveTotal');
+
+    function recalc() {
+      let total = 0;
+      names.forEach(function (n) {
+        const checked = document.querySelector('input[name="' + n + '"]:checked');
+        if (checked) total += parseInt(checked.value, 10);
+      });
+      if (isLate && !(waive && waive.checked)) total -= 2;
+      out.textContent = Math.max(total, 0);
+    }
+
+    document.querySelectorAll('.score-picker input').forEach(function (i) { i.addEventListener('change', recalc); });
+    if (waive) waive.addEventListener('change', recalc);
+    recalc();
+  })();
+</script>
+{% endblock %}

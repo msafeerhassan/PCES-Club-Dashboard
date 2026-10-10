@@ -7,7 +7,7 @@ from app.models.enums import SubmissionStatus
 from app.utils.hackatime_client import get_hours, get_streak, update_longest_streak
 
 
-def _award(member, key):
+def _award(member, key, departments=None):
     achievement = Achievement.query.filter_by(key=key).first()
     if achievement is None:
         return
@@ -19,23 +19,23 @@ def _award(member, key):
 
     from app.utils.discord_notify import notify_scoped
     notify_scoped(
-        False, member.departments,
+        False, departments or member.departments,
         "🏆 Achievement Unlocked", f"**{member.name}** earned **{achievement.name}**!", color=0xD4AF37,
     )
 
 
-def check_and_award_all(member):
+def check_and_award_all(member, departments=None):
     approved_count = Submission.query.filter_by(member_id=member.id, status=SubmissionStatus.APPROVED).count()
     if approved_count >= 1:
-        _award(member, "first_ship")
+        _award(member, "first_ship", departments=departments)
     if approved_count >= 5:
-        _award(member, "shipper")
+        _award(member, "shipper", departments=departments)
 
     attendance_records = Attendance.query.filter_by(member_id=member.id).all()
     total_marked = len(attendance_records)
     attended = sum(1 for a in attendance_records if a.present)
     if total_marked >= 3 and attended == total_marked:
-        _award(member, "perfect_attendance")
+        _award(member, "perfect_attendance", departments=departments)
 
     connection = member.hackatime_connection
     if connection:
@@ -43,10 +43,36 @@ def check_and_award_all(member):
         if streak:
             update_longest_streak(db, connection, streak.get("streak_days"))
         if connection.longest_streak_seen >= 7:
-            _award(member, "consistent")
+            _award(member, "consistent", departments=departments)
         if connection.longest_streak_seen >= 30:
-            _award(member, "dedicated")
+            _award(member, "dedicated", departments=departments)
 
         all_time = get_hours(oauth, connection)
         if all_time and all_time.get("total_seconds", 0) >= 100 * 3600:
-            _award(member, "century_club")
+            _award(member, "century_club", departments=departments)
+
+    from app.models.challenge import Challenge
+    from app.models.challenge_submission import ChallengeSubmission
+
+    judged = ChallengeSubmission.query.filter_by(member_id=member.id, is_judged=True).all()
+    total_points = sum(s.total_score for s in judged)
+
+    if total_points >= 50:
+        _award(member, "challenge_contributor", departments=departments)
+    if total_points >= 100:
+        _award(member, "challenge_builder", departments=departments)
+    if total_points >= 250:
+        _award(member, "challenge_specialist", departments=departments)
+    if total_points >= 500:
+        _award(member, "challenge_master",  departments=departments)
+    if total_points >= 1000:
+        _award(member, "challenge_legend",  departments=departments)
+
+    from app.utils.challenge_helpers import compute_challenge_streak
+
+    streak = compute_challenge_streak(member)
+
+    if streak >= 5:
+        _award(member, "five_week_streak", departments=departments)
+    if streak >= 10:
+        _award(member, "ten_week_streak", departments=departments)

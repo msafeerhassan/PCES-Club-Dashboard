@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/internal/cron/weekly-standings",
+      "schedule": "0 9 * * 1"
+    }
+  ]
+}

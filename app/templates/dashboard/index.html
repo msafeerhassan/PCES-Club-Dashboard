@@ -49,6 +49,30 @@
     </div>
     {% endif %}
 
+        {% if active_challenges %}
+    <div class="card">
+      <div class="card-head"><span class="card-icon" style="background:var(--hc-orange);">★</span><h2>Weekly challenge</h2></div>
+      {% for item in active_challenges %}
+      {% set st = item.state %}
+      <div class="dash-challenge">
+        <div>
+          <div class="dash-challenge-title">{{ item.challenge.title }}</div>
+          <div class="dash-challenge-meta">{{ item.challenge.technology }} · due {{ item.challenge.deadline.strftime('%b %d, %H:%M') }}</div>
+        </div>
+        <div class="dash-challenge-side">
+          {% if st.state == 'judged' %}<span class="countdown-chip chip-done">Scored {{ st.submission.total_score }}/20</span>
+          {% elif st.state == 'submitted' %}<span class="countdown-chip chip-done">Submitted</span>
+          {% else %}<span class="countdown-chip chip-open">{{ st.time_left }}</span>{% endif %}
+          {% if st.state == 'open' and st.can_submit %}
+          <a href="{{ url_for('challenge_submissions.submit', challenge_id=item.challenge.id) }}" class="btn btn-small btn-primary">Submit</a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      <a href="{{ url_for('challenges.list_challenges') }}" style="font-size:13px;">All challenges →</a>
+    </div>
+    {% endif %}
+
     <div class="card">
       <div class="card-head"><span class="card-icon" style="background:var(--hc-red);">▤</span><h2>Upcoming events</h2></div>
       {% if upcoming_events %}

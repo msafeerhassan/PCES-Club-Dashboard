@@ -1,137 +1,290 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}PCES Dashboard{% endblock %}</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <script src="{{ url_for('static', filename='js/live.js') }}" defer></script>
-</head>
-<body class="authed">
-  <script>
-    if (localStorage.getItem('pces-theme') === 'dark') { document.body.classList.add('dark-mode'); }
-    function toggleTheme() {
-      document.body.classList.toggle('dark-mode');
-      localStorage.setItem('pces-theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-    }
-  </script>
-  <div class="layout">
-    <aside class="sidebar">
-      <div class="sidebar-logo">
-        <a href="{{ url_for('dashboard.index') }}" class="brand-link">
-          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="PCES">
-          <span>PCES</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}PCES - Dashboard{% endblock %}</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <script src="{{ url_for('static', filename='js/live.js') }}" defer></script>
+  </head>
+  <body class="authed">
+    <script>
+      if (localStorage.getItem("pces-theme") === "dark") {
+        document.body.classList.add("dark-mode");
+      }
+      function toggleTheme() {
+        document.body.classList.toggle("dark-mode");
+        localStorage.setItem(
+          "pces-theme",
+          document.body.classList.contains("dark-mode") ? "dark" : "light",
+        );
+      }
+    </script>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <a href="{{ url_for('dashboard.index') }}" class="brand-link">
+            <img
+              src="{{ url_for('static', filename='images/logo.png') }}"
+              alt="PCES"
+            />
+            <span>PCES</span>
+          </a>
+          <button
+            class="mobile-menu-toggle"
+            onclick="
+              document.querySelector('.sidebar').classList.toggle('mobile-open')
+            "
+            aria-label="Toggle menu"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+            >
+              <path d="M3 6h18M3 12h18M3 18h18" />
+            </svg>
+          </button>
+        </div>
+        <nav class="sidebar-nav">
+          <a
+            href="{{ url_for('dashboard.index') }}"
+            class="nav-link {{ 'is-active' if request.endpoint == 'dashboard.index' else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <rect x="3" y="3" width="8" height="8" rx="2" />
+              <rect x="13" y="3" width="8" height="8" rx="2" />
+              <rect x="3" y="13" width="8" height="8" rx="2" />
+              <rect x="13" y="13" width="8" height="8" rx="2" />
+            </svg>
+            Dashboard
+          </a>
+          <a
+            href="{{ url_for('events.list_events') }}"
+            class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('events.') else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <rect x="3" y="5" width="18" height="16" rx="2" />
+              <path d="M3 10h18M8 3v4M16 3v4" />
+            </svg>
+            Events
+          </a>
+          <a
+            href="{{ url_for('submissions.my_submissions') }}"
+            class="nav-link {{ 'is-active' if request.endpoint in ['submissions.my_submissions', 'submissions.new_submission'] else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <path d="M12 19V5M5 12l7-7 7 7" />
+            </svg>
+            My Submissions
+          </a>
+          <a
+            href="{{ url_for('attendance.my_attendance') }}"
+            class="nav-link {{ 'is-active' if request.endpoint == 'attendance.my_attendance' else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+            My Attendance
+          </a>
+          <a
+            href="{{ url_for('activity.my_activity') }}"
+            class="nav-link {{ 'is-active' if request.endpoint == 'activity.my_activity' else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" />
+            </svg>
+            My Activity
+          </a>
+          <a
+            href="{{ url_for('resources.list_resources') }}"
+            class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('resources.') else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <path
+                d="M4 19V5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2zM4 19a2 2 0 0 0 2 2h13"
+              />
+            </svg>
+            Resources
+          </a>
+          <a
+            href="{{ url_for('announcements.list_announcements') }}"
+            class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('announcements.') else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <path d="M3 11v2a2 2 0 0 0 2 2h1l4 4V7L6 11H5a2 2 0 0 0-2 2z" />
+              <path d="M15 8a4 4 0 0 1 0 8" />
+            </svg>
+            Announcements
+          </a>
+          <a
+            href="{{ url_for('leaderboard.index') }}"
+            class="nav-link {{ 'is-active' if request.endpoint == 'leaderboard.index' else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z" />
+              <path d="M7 6H4a2 2 0 0 0 0 4h1M17 6h3a2 2 0 0 1 0 4h-1" />
+            </svg>
+            Leaderboard
+          </a>
+        <a href="{{ url_for('challenges.list_challenges') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('challenges.') else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          Challenges
         </a>
-        <button class="mobile-menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('mobile-open')" aria-label="Toggle menu">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-        </button>
-      </div>
-      <nav class="sidebar-nav">
-        <a href="{{ url_for('dashboard.index') }}" class="nav-link {{ 'is-active' if request.endpoint == 'dashboard.index' else '' }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
-          Dashboard
+        {% if current_user.role.value in ['president', 'department_admin'] %}
+        <a href="{{ url_for('challenge_judging.judge_list') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('challenge_judging.') else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Judge Challenges
         </a>
-        <a href="{{ url_for('events.list_events') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('events.') else '' }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
-          Events
-        </a>
-        <a href="{{ url_for('submissions.my_submissions') }}" class="nav-link {{ 'is-active' if request.endpoint in ['submissions.my_submissions', 'submissions.new_submission'] else '' }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-          My Submissions
-        </a>
-        <a href="{{ url_for('attendance.my_attendance') }}" class="nav-link {{ 'is-active' if request.endpoint == 'attendance.my_attendance' else '' }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M20 6 9 17l-5-5"/></svg>
-          My Attendance
-        </a>
-        <a href="{{ url_for('activity.my_activity') }}" class="nav-link {{ 'is-active' if request.endpoint == 'activity.my_activity' else '' }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>
-          My Activity
-        </a>
-        <a href="{{ url_for('resources.list_resources') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('resources.') else '' }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M4 19V5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2zM4 19a2 2 0 0 0 2 2h13"/></svg>
-          Resources
-        </a>
-        <a href="{{ url_for('announcements.list_announcements') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('announcements.') else '' }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M3 11v2a2 2 0 0 0 2 2h1l4 4V7L6 11H5a2 2 0 0 0-2 2z"/><path d="M15 8a4 4 0 0 1 0 8"/></svg>
-          Announcements
-        </a>
-                <a href="{{ url_for('leaderboard.index') }}" class="nav-link {{ 'is-active' if request.endpoint == 'leaderboard.index' else '' }}">
+        {% endif %}
+        <a href="{{ url_for('challenge_leaderboard.index') }}" class="nav-link {{ 'is-active' if request.endpoint == 'challenge_leaderboard.index' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a2 2 0 0 0 0 4h1M17 6h3a2 2 0 0 1 0 4h-1"/></svg>
-          Leaderboard
+          Challenge Leaderboard
         </a>
-                <a href="{{ url_for('achievements.index') }}" class="nav-link {{ 'is-active' if request.endpoint == 'achievements.index' else '' }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.5 7 21l5-3 5 3-1.5-7.5"/></svg>
-          Achievements
-        </a>
-        <a href="{{ url_for('profile.view_profile') }}" class="nav-link {{ 'is-active' if request.endpoint == 'profile.view_profile' else '' }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>
-          Profile
-        </a>
-
-{% set is_admin_role = current_user.role.value in ['president', 'department_admin'] %}
-        {% set is_view_role = current_user.role.value in ['president', 'department_admin', 'faculty_advisor'] %}
-        {% if is_view_role %}
-        <div class="sidebar-label">Admin</div>
-        <a href="{{ url_for('admin.summary') }}" class="nav-link {{ 'is-active' if request.endpoint == 'admin.summary' else '' }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
-          Summary
-        </a>
-                <a href="{{ url_for('admin.department_health') }}" class="nav-link {{ 'is-active' if request.endpoint == 'admin.department_health' else '' }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          Department Health
-        </a>
-{% if is_view_role %}
-        <a href="{{ url_for('admin.members_list') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('admin.member') else '' }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3 3-5 7-5s7 2 7 5"/><circle cx="18" cy="8" r="2.5"/><path d="M15 14c2.5.3 4.5 2 4.5 4.5"/></svg>
-          Members
-        </a>
-        {% endif %}
-        <a href="{{ url_for('submissions.all_submissions') }}" class="nav-link {{ 'is-active' if request.endpoint == 'submissions.all_submissions' else '' }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>
-          All Submissions
-        </a>
-        <a href="{{ url_for('activity.admin_list') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('activity.admin') else '' }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M3 17l5-5 4 4 8-9"/></svg>
-          Member Activity
-        </a>
-
-        {% if current_user.role.value == 'president' %}
-        <a href="{{ url_for('departments.list_departments') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('departments.') else '' }}">
+        <a href="{{ url_for('department_rankings.index') }}" class="nav-link {{ 'is-active' if request.endpoint == 'department_rankings.index' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M3 21V7l9-4 9 4v14"/><path d="M9 21v-6h6v6"/></svg>
-          Departments
+          Department Rankings
         </a>
-        {% endif %}
-        <a href="{{ url_for('achievements.manage') }}" class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('achievements.manage') else '' }}">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.5 7 21l5-3 5 3-1.5-7.5"/></svg>
-          Manage Achievements
-        </a>
-        <a href="{{ url_for('reports.export_csv') }}" class="nav-link">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
-          Export CSV
-        </a>
-        {% endif %}
-      </nav>
-      <div class="sidebar-footer">
-        <div class="sidebar-footer-user">
-          <span class="sidebar-footer-avatar">{{ current_user.name[0] }}</span>
-          <div>
-            <div style="font-size:13px; font-weight:700; color:var(--ink);">{{ current_user.name.split(' ')[0] }}</div>
-            <div style="font-size:11px; color:var(--muted);">{{ current_user.role.value.replace('_',' ')|title }}</div>
+          <a
+            href="{{ url_for('achievements.index') }}"
+            class="nav-link {{ 'is-active' if request.endpoint == 'achievements.index' else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <circle cx="12" cy="8" r="6" />
+              <path d="M8.5 13.5 7 21l5-3 5 3-1.5-7.5" />
+            </svg>
+            Achievements
+          </a>
+          <a
+            href="{{ url_for('profile.view_profile') }}"
+            class="nav-link {{ 'is-active' if request.endpoint == 'profile.view_profile' else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <circle cx="12" cy="8" r="3.5" />
+              <path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6" />
+            </svg>
+            Profile
+          </a>
+
+          {% set is_admin_role = current_user.role.value in ['president',
+          'department_admin'] %} {% set is_view_role = current_user.role.value
+          in ['president', 'department_admin', 'faculty_advisor'] %} {% if
+          is_view_role %}
+          <div class="sidebar-label">Admin</div>
+          <a
+            href="{{ url_for('admin.summary') }}"
+            class="nav-link {{ 'is-active' if request.endpoint == 'admin.summary' else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <path d="M4 20V10M12 20V4M20 20v-7" />
+            </svg>
+            Summary
+          </a>
+          <a
+            href="{{ url_for('admin.department_health') }}"
+            class="nav-link {{ 'is-active' if request.endpoint == 'admin.department_health' else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+            </svg>
+            Department Health
+          </a>
+          {% if is_view_role %}
+          <a
+            href="{{ url_for('admin.members_list') }}"
+            class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('admin.member') else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <circle cx="9" cy="8" r="3" />
+              <path d="M2 20c0-3 3-5 7-5s7 2 7 5" />
+              <circle cx="18" cy="8" r="2.5" />
+              <path d="M15 14c2.5.3 4.5 2 4.5 4.5" />
+            </svg>
+            Members
+          </a>
+          {% endif %}
+          <a
+            href="{{ url_for('submissions.all_submissions') }}"
+            class="nav-link {{ 'is-active' if request.endpoint == 'submissions.all_submissions' else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <path d="M3 9h18" />
+            </svg>
+            All Submissions
+          </a>
+          <a
+            href="{{ url_for('activity.admin_list') }}"
+            class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('activity.admin') else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <path d="M3 17l5-5 4 4 8-9" />
+            </svg>
+            Member Activity
+          </a>
+
+          {% if current_user.role.value == 'president' %}
+          <a
+            href="{{ url_for('departments.list_departments') }}"
+            class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('departments.') else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <path d="M3 21V7l9-4 9 4v14" />
+              <path d="M9 21v-6h6v6" />
+            </svg>
+            Departments
+          </a>
+          {% endif %}
+          <a
+            href="{{ url_for('achievements.manage') }}"
+            class="nav-link {{ 'is-active' if request.endpoint and request.endpoint.startswith('achievements.manage') else '' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <circle cx="12" cy="8" r="6" />
+              <path d="M8.5 13.5 7 21l5-3 5 3-1.5-7.5" />
+            </svg>
+            Manage Achievements
+          </a>
+          <a href="{{ url_for('reports.export_csv') }}" class="nav-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2">
+              <path d="M12 3v12M7 10l5 5 5-5" />
+              <path d="M4 19h16" />
+            </svg>
+            Export CSV
+          </a>
+          {% endif %}
+        </nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-footer-user">
+            <span class="sidebar-footer-avatar"
+              >{{ current_user.name[0] }}</span
+            >
+            <div>
+              <div style="font-size: 13px; font-weight: 700; color: var(--ink)">
+                {{ current_user.name.split(' ')[0] }}
+              </div>
+              <div style="font-size: 11px; color: var(--muted)">
+                {{ current_user.role.value.replace('_',' ')|title }}
+              </div>
+            </div>
+          </div>
+          <div class="sidebar-footer-actions">
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn"
+              >Log out</a
+            >
           </div>
         </div>
-        <div class="sidebar-footer-actions">
-          <a href="{{ url_for('auth.logout') }}" class="logout-btn">Log out</a>
+      </aside>
+      <main class="content">
+        <div class="content-header">
+          <h1 class="page-title">{% block page_title %}{% endblock %}</h1>
         </div>
-      </div>
-    </aside>
-    <main class="content">
-      <div class="content-header">
-        <h1 class="page-title">{% block page_title %}{% endblock %}</h1>
-      </div>
-      <div class="content-inner">
-        {% block content %}{% endblock %}
-      </div>
-    </main>
-  </div>
-</body>
+        <div class="content-inner">{% block content %}{% endblock %}</div>
+      </main>
+    </div>
+  </body>
 </html>

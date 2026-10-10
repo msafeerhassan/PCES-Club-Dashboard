@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Department Rankings - PCES{% endblock %}
+{% block page_title %}Department rankings{% endblock %}
+{% block content %}
+
+{% macro rank_card(title, rows, key, suffix, my_ids) %}
+<section class="rank-card">
+  <div class="rank-card-head"><h2>{{ title }}</h2></div>
+  {% set top = (rows[0][key] if rows else 0) or 1 %}
+  {% for r in rows %}
+  <div class="rank-card-row {{ 'is-mine' if r.id in my_ids else '' }} {{ 'is-first' if loop.first and r[key] > 0 else '' }}">
+    <span class="rank-badge">{{ loop.index if r[key] > 0 else '–' }}</span>
+    <span class="rank-card-name">{{ r.name }}{% if r.id in my_ids %}<span class="you-tag">You</span>{% endif %}</span>
+    <span class="rank-card-value">{{ r[key] }}{{ suffix }}</span>
+    <div class="rank-bar-track rank-card-bar"><div class="rank-bar-fill" style="width: {{ (r[key] / top * 100) if top else 0 }}%;"></div></div>
+  </div>
+  {% endfor %}
+</section>
+{% endmacro %}
+
+<p style="color:var(--muted); font-size:14px; margin-bottom:20px;">Aggregate department comparisons. No individual member data is shown here.</p>
+
+<div class="rank-compare-grid">
+  {{ rank_card('Coding hours', rows_by_hours, 'hours', 'h', my_ids) }}
+  {{ rank_card('Projects shipped', rows_by_shipped, 'shipped', '', my_ids) }}
+  {{ rank_card('Challenge points', rows_by_points, 'challenge_points', ' pts', my_ids) }}
+</div>
+{% endblock %}

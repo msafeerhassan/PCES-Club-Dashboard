@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Judge Challenges - PCES{% endblock %}
+{% block page_title %}Judge submissions{% endblock %}
+{% block content %}
+
+{% macro judge_card(s) %}
+<div class="admin-sub-card {{ 'is-featured' if s.is_judged else '' }}">
+  {% if s.is_judged %}<span class="admin-sub-ribbon">{{ s.total_score }}/20</span>{% endif %}
+  <div class="member-chip">
+    <span class="member-avatar">{{ s.member.name[0] }}</span>
+    <div>
+      <div style="font-weight:700; font-size:13.5px; color:var(--ink);">{{ s.member.name }}</div>
+      <span class="badge badge-blue">{{ s.department.name }}</span>
+    </div>
+  </div>
+  <div class="admin-sub-title">{{ s.challenge.title }}</div>
+  <div class="admin-sub-event">Submitted {{ s.submitted_at.strftime('%b %d, %H:%M') }}{% if s.is_late %} <span class="badge badge-danger">Late</span>{% endif %}</div>
+  <div class="admin-sub-footer">
+    <span class="admin-sub-date">{{ 'Judged' if s.is_judged else 'Awaiting judgment' }}</span>
+    <a href="{{ url_for('challenge_judging.judge_submission', submission_id=s.id) }}" class="btn btn-small {{ '' if s.is_judged else 'btn-primary' }}">{{ 'Review' if s.is_judged else 'Judge' }}</a>
+  </div>
+</div>
+{% endmacro %}
+
+<div class="events-toolbar">
+  <div class="toolbar-group">
+    <a href="{{ url_for('challenges.list_challenges') }}" class="btn btn-small">← Challenges</a>
+  </div>
+  <span class="countdown-chip {{ 'chip-open' if pending_count else 'chip-done' }}">{{ pending_count }} awaiting judgment</span>
+</div>
+
+{% set pending = submissions | rejectattr('is_judged') | list %}
+{% set done = submissions | selectattr('is_judged') | list %}
+
+{% if pending %}
+<h2>Awaiting judgment</h2>
+<div class="admin-sub-grid" style="margin-bottom:28px;">
+  {% for s in pending %}{{ judge_card(s) }}{% endfor %}
+</div>
+{% endif %}
+
+{% if done %}
+<h2>Judged</h2>
+<div class="admin-sub-grid">
+  {% for s in done %}{{ judge_card(s) }}{% endfor %}
+</div>
+{% endif %}
+
+{% if not submissions %}
+<div class="empty-state-card"><h3>No submissions to judge yet</h3></div>
+{% endif %}
+{% endblock %}

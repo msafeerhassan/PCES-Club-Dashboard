@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Weekly Challenges - PCES{% endblock %}
+{% block page_title %}Weekly challenges{% endblock %}
+{% block content %}
+
+{% macro challenge_card(c, st, counts, manage, past) %}
+<article class="challenge-card {{ 'is-past' if past else '' }}">
+  <div class="challenge-top">
+    <span class="challenge-theme">{{ c.theme }}</span>
+    {% if st.state == 'judged' %}
+    <span class="countdown-chip chip-done">Scored {{ st.submission.total_score }}/20</span>
+    {% elif st.state == 'submitted' %}
+    <span class="countdown-chip chip-done">Submitted</span>
+    {% elif st.state == 'overdue' %}
+    <span class="countdown-chip chip-overdue">Overdue</span>
+    {% else %}
+    <span class="countdown-chip chip-open">{{ st.time_left }}</span>
+    {% endif %}
+  </div>
+
+  <h3 class="challenge-title">{{ c.title }}</h3>
+
+  <div class="event-card-badges">
+    <span class="badge">{{ c.technology }}</span>
+    {% if c.is_club_wide %}
+    <span class="badge">Club-wide</span>
+    {% else %}
+      {% for d in c.departments[:2] %}<span class="badge badge-blue">{{ d.name }}</span>{% endfor %}
+      {% if c.departments|length > 2 %}<span class="badge">+{{ c.departments|length - 2 }} more</span>{% endif %}
+    {% endif %}
+  </div>
+
+  <p class="challenge-objective">{{ c.objective }}</p>
+
+  <div class="challenge-meta">
+    <span>Released {{ c.release_date.strftime('%b %d') }}</span>
+    <span>Due {{ c.deadline.strftime('%b %d, %H:%M') }}</span>
+  </div>
+
+  {% if st.state == 'overdue' and st.can_submit %}
+  <p class="penalty-note">Late submissions lose 2 points unless a judge waives the penalty.</p>
+  {% endif %}
+
+  <div class="challenge-footer">
+    <div class="challenge-actions">
+      {% if st.state == 'judged' %}
+      <a href="{{ url_for('challenge_submissions.mine') }}" class="btn btn-small">View result</a>
+      {% elif st.state == 'submitted' and st.can_submit %}
+      <a href="{{ url_for('challenge_submissions.submit', challenge_id=c.id) }}" class="btn btn-small">Update submission</a>
+      {% elif st.can_submit %}
+      <a href="{{ url_for('challenge_submissions.submit', challenge_id=c.id) }}" class="btn btn-small btn-primary">{{ 'Submit late' if st.state == 'overdue' else 'Submit' }}</a>
+      {% endif %}
+    </div>
+    {% if manage %}
+    <div class="challenge-actions">
+      <a href="{{ url_for('challenges.edit_challenge', challenge_id=c.id) }}" class="btn btn-small">Edit</a>
+      <form method="POST" action="{{ url_for('challenges.delete_challenge', challenge_id=c.id) }}" class="inline-form" onsubmit="return confirm('Delete this challenge? All submissions to it will be deleted too.');">
+        <button type="submit" class="btn btn-small">Delete</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if counts %}
+  <a href="{{ url_for('challenge_judging.judge_list') }}" class="challenge-admin-note">{{ counts.total }} submission{{ 's' if counts.total != 1 else '' }}{% if counts.pending %} · {{ counts.pending }} to judge{% endif %}</a>
+  {% endif %}
+</article>
+{% endmacro %}
+
+<div class="events-toolbar">
+  <div class="toolbar-group">
+    {% if current_user.role.value in ['member', 'department_admin'] %}
+    <a href="{{ url_for('challenge_submissions.mine') }}" class="btn btn-small">My results</a>
+    {% endif %}
+    <a href="{{ url_for('challenge_leaderboard.index') }}" class="btn btn-small">Leaderboard</a>
+    {% if is_admin %}
+    <a href="{{ url_for('challenge_judging.judge_list') }}" class="btn btn-small">Judge submissions</a>
+    {% endif %}
+  </div>
+  {% if is_admin %}
+  <a href="{{ url_for('challenges.new_challenge') }}" class="btn btn-primary">Create challenge</a>
+  {% endif %}
+</div>
+
+{% if active %}
+<h2>Active</h2>
+<div class="challenge-grid">
+  {% for c in active %}
+  {{ challenge_card(c, states[c.id], admin_counts.get(c.id), can_manage_challenge(current_user, c), False) }}
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if past %}
+<h2>Past challenges</h2>
+<div class="challenge-grid">
+  {% for c in past %}
+  {{ challenge_card(c, states[c.id], admin_counts.get(c.id), can_manage_challenge(current_user, c), True) }}
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if not active and not past %}
+<div class="empty-state-card"><h3>No challenges yet</h3><p>New weekly challenges will show up here as soon as they're released.</p></div>
+{% endif %}
+{% endblock %}

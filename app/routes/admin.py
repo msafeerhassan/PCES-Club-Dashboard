@@ -15,6 +15,7 @@ from app.utils.permissions import (
     VIEW_ALL_ROLES,
 )
 
+from app.utils.timeutil import club_now
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
 def build_summary_data(current_user):
@@ -41,7 +42,7 @@ def build_summary_data(current_user):
 
     member_ids = [m.id for m in members]
     total_members = len(members)
-    upcoming_events = Event.query.filter(Event.event_date >= datetime.utcnow().date()).count()
+    upcoming_events = Event.query.filter(Event.event_date >= club_now().date()).count()
 
     submission_count = Submission.query.filter(
         Submission.member_id.in_(member_ids), Submission.status == SubmissionStatus.APPROVED
@@ -93,8 +94,38 @@ def build_summary_data(current_user):
     featured_count = Submission.query.filter(
         Submission.member_id.in_(member_ids), Submission.is_featured == True
     ).count()
-    next_event = Event.query.filter(Event.event_date >= datetime.utcnow().date()).order_by(Event.event_date).first()
-    days_to_next_event = (next_event.event_date - datetime.utcnow().date()).days if next_event else None
+    next_event = Event.query.filter(Event.event_date >= club_now().date()).order_by(Event.event_date).first()
+    days_to_next_event = (next_event.event_date - club_now().date()).days if next_event else None
+
+    from app.models.challenge import Challenge
+    from app.models.challenge_submission import ChallengeSubmission
+    from app.utils.permissions import can_view_challenge
+    now_local = club_now()
+    visible_challenges = [
+        c for c in Challenge.query.order_by(Challenge.release_date.desc(), Challenge.id.desc()).all()
+        if can_view_challenge(current_user, c)
+    ]
+    active_challenge_count = sum(1 for c in visible_challenges if c.deadline >= now_local)
+
+    scoped_cs = ChallengeSubmission.query.filter(ChallengeSubmission.department_id.in_(dept_ids)).all()
+    challenge_pending_count = sum(1 for s in scoped_cs if not s.is_judged)
+    judged_scores = [s.total_score for s in scoped_cs if s.is_judged]
+    challenge_avg_score = round(sum(judged_scores) / len(judged_scores), 1) if judged_scores else None
+
+    latest_participation = None
+    if visible_challenges:
+        latest = visible_challenges[0]
+        latest_dept_ids = {d.id for d in latest.departments}
+        eligible = [m for m in members if latest.is_club_wide or ({d.id for d in m.departments} & latest_dept_ids)]
+        if eligible:
+            submitted = ChallengeSubmission.query.filter(
+                ChallengeSubmission.challenge_id == latest.id,
+                ChallengeSubmission.member_id.in_([m.id for m in eligible]),
+            ).count()
+            latest_participation = {
+                "title": latest.title, "submitted": submitted,
+                "eligible": len(eligible), "pct": round(submitted / len(eligible) * 100, 1),
+            }
 
     return {
         "total_members": total_members,
@@ -113,6 +144,10 @@ def build_summary_data(current_user):
         "featured_count": featured_count,
         "next_event": next_event,
         "days_to_next_event": days_to_next_event,
+        "active_challenge_count": active_challenge_count,
+        "challenge_pending_count": challenge_pending_count,
+        "challenge_avg_score": challenge_avg_score,
+        "latest_participation": latest_participation,
     }
 
 @admin_bp.route("/summary")
@@ -201,7 +236,7 @@ def member_disable(member_id):
 
         member.is_disabled = True
         member.disabled_reason = reason
-        member.disabled_at = datetime.utcnow()
+        member.disabled_at = club_now()
         db.session.commit()
         return redirect(url_for("admin.members_list"))
 
@@ -316,6 +351,9 @@ def department_health():
 
     achievements_earned = MemberAchievement.query.filter(MemberAchievement.member_id.in_(member_ids)).count() if member_ids else 0
 
+    from app.models.challenge_submission import ChallengeSubmission
+    dept_cs = ChallengeSubmission.query.filter_by(department_id=selected.id).all()
+    dept_scores = [s.total_score for s in dept_cs if s.is_judged]
     data = {
         "member_count": len(members),
         "submission_count": submission_count,
@@ -325,6 +363,9 @@ def department_health():
         "active_now": active_now,
         "adoption_pct": round((connected_count / len(members)) * 100, 1) if members else 0,
         "achievements_earned": achievements_earned,
+        "challenge_points": sum(dept_scores),
+        "challenge_avg": round(sum(dept_scores) / len(dept_scores), 1) if dept_scores else None,
+        "challenge_pending": sum(1 for s in dept_cs if not s.is_judged),
     }
 
     return render_template("admin/department_health.html", available=available, selected=selected, data=data)

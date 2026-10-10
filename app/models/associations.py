@@ -17,3 +17,9 @@ announcement_departments = db.Table(
     db.Column("announcement_id", db.Integer, db.ForeignKey("announcements.id"), primary_key=True),
     db.Column("department_id", db.Integer, db.ForeignKey("departments.id"), primary_key=True),
 )
+
+challenge_departments = db.Table(
+    "challenge_departments",
+    db.Column("challenge_id", db.Integer, db.ForeignKey("challenges.id"), primary_key=True),
+    db.Column("department_id", db.Integer, db.ForeignKey("departments.id"), primary_key=True),
+)

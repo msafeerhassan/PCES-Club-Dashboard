@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Challenge Leaderboard - PCES{% endblock %}
+{% block page_title %}Challenge leaderboard{% endblock %}
+{% block content %}
+
+{% if not departments %}
+<div class="empty-state-card"><h3>No department assigned</h3></div>
+{% else %}
+
+<div class="events-toolbar">
+  <div class="toolbar-group">
+    <a href="{{ url_for('challenges.list_challenges') }}" class="btn btn-small">← Challenges</a>
+  </div>
+  {% if departments | length > 1 %}
+  <form method="GET" class="search-form" style="margin:0;">
+    <select name="department_id" onchange="this.form.submit()">
+      {% for d in departments %}
+      <option value="{{ d.id }}" {{ 'selected' if selected.id == d.id else '' }}>{{ d.name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+  {% else %}
+  <span class="badge badge-blue">{{ selected.name }}</span>
+  {% endif %}
+</div>
+
+{% if rows %}
+{% set max_points = rows[0].points or 1 %}
+
+<div class="podium">
+  {% for r in rows[:3] %}
+  <div class="podium-card rank-{{ loop.index }}" style="animation-delay: {{ loop.index0 * 0.06 }}s;">
+    <div class="podium-medal">{{ loop.index }}</div>
+    <div class="podium-avatar">{{ r.member.name[0] }}</div>
+    <div class="podium-name">{{ r.member.name }}</div>
+    <div class="podium-value">{{ r.points }} pts</div>
+    <div class="podium-sub">avg {{ r.average }} · {{ r.count }} challenge{{ 's' if r.count != 1 else '' }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="lb-list challenge-lb">
+  {% for r in rows %}
+  <div class="lb-row {{ 'is-you' if r.member.id == current_user.id else '' }}" style="animation-delay: {{ loop.index0 * 0.03 }}s;">
+    <span class="lb-rank">{{ loop.index }}</span>
+    <div class="member-chip" style="width:170px; flex-shrink:0;">
+      <span class="member-avatar">{{ r.member.name[0] }}</span>
+      <span style="font-weight:600; font-size:13.5px; color:var(--ink);">{{ r.member.name }}</span>
+    </div>
+    <div class="lb-bar-track"><div class="lb-bar-fill" data-fill="{{ (r.points / max_points * 100) if max_points else 0 }}"></div></div>
+    <span class="lb-extra">avg {{ r.average }}</span>
+    <span class="lb-extra">{{ r.streak }}w streak</span>
+    <span class="lb-value">{{ r.points }} pts</span>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+  document.querySelectorAll('.lb-bar-fill').forEach(function (el) {
+    const pct = el.getAttribute('data-fill');
+    requestAnimationFrame(function () { el.style.width = pct + '%'; });
+  });
+</script>
+{% else %}
+<div class="empty-state-card"><h3>No judged submissions yet</h3><p>Rankings appear once the first challenge submissions are scored.</p></div>
+{% endif %}
+{% endif %}
+{% endblock %}

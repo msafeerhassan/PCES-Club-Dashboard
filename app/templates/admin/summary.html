@@ -69,35 +69,39 @@
   </div>
 </div>
 
-<div class="health-grid">
-<div class="health-card">
-    <div class="health-card-label">Hackatime adoption</div>
-    <div class="radial-wrap">
-      <svg class="radial-svg" width="64" height="64" viewBox="0 0 64 64">
-        <defs>
-          <linearGradient id="radialGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="var(--hc-red)"/>
-            <stop offset="100%" stop-color="var(--hc-orange)"/>
-          </linearGradient>
-        </defs>
-        <circle class="track" cx="32" cy="32" r="26"/>
-        <circle class="fill" cx="32" cy="32" r="26" data-radial="{{ hackatime_adoption_pct }}"/>
-        <text x="32" y="37" text-anchor="middle">{{ hackatime_adoption_pct | round | int }}%</text>
-      </svg>
-      <div class="health-card-sub">{{ connected_count }} of {{ total_members }} connected</div>
+<h2 style="margin-top:8px;">Weekly challenges</h2>
+<div class="health-grid" style="margin-bottom:20px;">
+  <div class="health-card">
+    <div class="health-card-label">Active challenges</div>
+    <div class="health-card-value" data-countup="{{ active_challenge_count }}">0</div>
+    <div class="health-card-sub">open right now</div>
+  </div>
+  <div class="health-card">
+    <div class="health-card-label">Awaiting judging</div>
+    <div class="health-card-value" data-countup="{{ challenge_pending_count }}">0</div>
+    <div class="health-card-sub">
+      {% if current_user.role.value != 'faculty_advisor' %}<a href="{{ url_for('challenge_judging.judge_list') }}">Judge now →</a>{% else %}submissions in your scope{% endif %}
     </div>
   </div>
   <div class="health-card">
-    <div class="health-card-label">Featured projects</div>
-    <div class="health-card-value">{{ featured_count }}</div>
-    <div class="health-card-sub">shown on public homepage</div>
+    <div class="health-card-label">Average score</div>
+    <div class="health-card-value">{{ challenge_avg_score if challenge_avg_score is not none else '-' }}</div>
+    <div class="health-card-sub">out of 20</div>
   </div>
   <div class="health-card">
-    <div class="health-card-label">Disabled accounts</div>
-    <div class="health-card-value">{{ disabled_count }}</div>
-    <div class="health-card-sub">{{ 'no issues' if disabled_count == 0 else 'review in Members' }}</div>
+    <div class="health-card-label">Latest participation</div>
+    {% if latest_participation %}
+    <div class="adoption-bar-track"><div class="adoption-bar-fill" style="width: {{ latest_participation.pct }}%;"></div></div>
+    <div class="health-card-value">{{ latest_participation.pct }}%</div>
+    <div class="health-card-sub">{{ latest_participation.submitted }} of {{ latest_participation.eligible }} · {{ latest_participation.title }}</div>
+    {% else %}
+    <div class="health-card-value">-</div>
+    <div class="health-card-sub">no challenges yet</div>
+    {% endif %}
   </div>
 </div>
+
+<div class="health-grid">
 
 <div class="dash-grid">
   <div>
