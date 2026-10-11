@@ -4,6 +4,7 @@
 {% block content %}
 <div class="form-panel">
   <form method="POST" class="form-card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Name <input type="text" name="name" required></label>
     <label>Description <input type="text" name="description" required maxlength="255"></label>
     <div class="form-row-2">

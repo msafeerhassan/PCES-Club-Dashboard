@@ -9,6 +9,9 @@ from app.utils.permissions import can_view_challenge
 from app.utils.challenge_helpers import get_eligible_departments, compute_challenge_streak
 from app.utils.timeutil import club_now
 from app.utils.storage import upload_submission_files
+from app.utils.uploads import validate_uploads
+from app.utils.lapse_client import needs_lapse, timelapse_options, apply_lapse, challenge_window
+from flask import Blueprint, render_template, request, redirect, url_for, abort, current_app, flash
 
 challenge_submissions_bp = Blueprint("challenge_submissions", __name__, url_prefix="/challenges")
 
@@ -37,6 +40,20 @@ def submit(challenge_id):
     now = club_now()
     will_be_late = now > challenge.deadline
 
+    mode = challenge.verification_mode
+    if needs_lapse(mode):
+        lapse_options, lapse_error = timelapse_options(current_user.lapse_connection)
+    else:
+        lapse_options, lapse_error = [], None
+
+    def render(error=None):
+        return render_template(
+            "challenges/submit.html", challenge=challenge, hackatime_projects=hackatime_projects,
+            eligible_departments=eligible_departments, will_be_late=will_be_late, existing=existing,
+            error=error, lapse_mode=mode, lapse_options=lapse_options, lapse_error=lapse_error,
+            lapse_connected=current_user.lapse_connection is not None,
+        )
+
     if request.method == "POST":
         github_url = request.form.get("github_url", "").strip() or None
         demo_url = request.form.get("demo_url", "").strip() or None
@@ -47,25 +64,21 @@ def submit(challenge_id):
         if len(eligible_departments) > 1:
             department_id = request.form.get("department_id")
             if not department_id:
-                return render_template(
-                    "challenges/submit.html", challenge=challenge, hackatime_projects=hackatime_projects,
-                    eligible_departments=eligible_departments, will_be_late=will_be_late, existing=existing,
-                    error="Select which department this submission belongs to."
-                )
+                return render(error="Select which department this submission belongs to.")
             department_id = int(department_id)
             if department_id not in {d.id for d in eligible_departments}:
                 abort(403)
         else:
             department_id = eligible_departments[0].id
 
+        upload_error = validate_uploads(request.files.getlist("files"))
+        if upload_error:
+            return render(error=upload_error)
+
         files_in_request = [f for f in request.files.getlist("files") if f and f.filename]
         has_existing_files = bool(existing and existing.files)
         if not (github_url or demo_url or files_in_request or has_existing_files):
-            return render_template(
-                "challenges/submit.html", challenge=challenge, hackatime_projects=hackatime_projects,
-                eligible_departments=eligible_departments, will_be_late=will_be_late, existing=existing,
-                error="Add at least a GitHub link, a demo link, or a file before submitting."
-            )
+            return render(error="Add at least a GitHub link, a demo link, or a file before submitting.")
 
         if existing:
             submission = existing
@@ -82,17 +95,25 @@ def submit(challenge_id):
         submission.late_reason = late_reason if will_be_late else None
         db.session.flush()
 
+        lapse_result = apply_lapse(
+            submission, mode, current_user, request.form.get("lapse_timelapse_id"),
+            hackatime_project_name, challenge_window(challenge, now),
+        )
+
         uploaded = upload_submission_files(current_app, request.files.getlist("files"))
         for url, name in uploaded:
             db.session.add(ChallengeSubmissionFile(submission_id=submission.id, file_url=url, file_name=name))
 
         db.session.commit()
+
+        if lapse_result and lapse_result["status"] != "VERIFIED":
+            flash("Submission saved, but the Lapse check did not pass (" + lapse_result["note"]
+                  + "). An admin will review it manually.", "warning")
+        else:
+            flash("Submission saved.", "success")
         return redirect(url_for("challenges.list_challenges"))
 
-    return render_template(
-        "challenges/submit.html", challenge=challenge, hackatime_projects=hackatime_projects,
-        eligible_departments=eligible_departments, will_be_late=will_be_late, existing=existing, error=None,
-    )
+    return render()
 
 
 @challenge_submissions_bp.route("/mine")

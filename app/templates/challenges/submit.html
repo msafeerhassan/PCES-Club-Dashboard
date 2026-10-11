@@ -24,6 +24,7 @@
   </aside>
 
   <form method="POST" enctype="multipart/form-data" class="form-panel challenge-submit-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="form-card">
       {% if error %}<p style="color:var(--hc-red); font-weight:700;">{{ error }}</p>{% endif %}
 
@@ -52,6 +53,11 @@
         </select>
         <span class="field-hint">Judges use this as evidence the work happened during the week. It never affects your score.</span>
       </label>
+
+            {% if lapse_mode in ('BOTH', 'LAPSE') %}
+      {% set selected_lapse_id = existing.lapse_timelapse_id if existing and existing.lapse_timelapse_id else '' %}
+      {% include "partials/lapse_picker.html" %}
+      {% endif %}
 
       <label>Files (CAD files, screenshots, executables)
         <div class="file-input-wrap"><input type="file" name="files" multiple></div>

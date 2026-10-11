@@ -11,6 +11,8 @@ from app.utils.permissions import (
     assignable_departments,
 )
 
+from app.utils.lapse_client import clean_mode
+
 challenges_bp = Blueprint("challenges", __name__, url_prefix="/challenges")
 
 
@@ -65,7 +67,7 @@ def new_challenge():
         dept_ids = [int(d) for d in request.form.getlist("departments")]
         release_date = request.form.get("release_date")
         deadline_raw = request.form.get("deadline")
-
+        verification_mode = clean_mode(request.form.get("verification_mode"))
         if current_user.role.value != "president":
             is_club_wide = False
 
@@ -84,6 +86,7 @@ def new_challenge():
             is_club_wide=is_club_wide,
             release_date=datetime.strptime(release_date, "%Y-%m-%d").date(),
             deadline=datetime.fromisoformat(deadline_raw),
+            verification_mode=verification_mode,
             created_by_id=current_user.id,
         )
         if not is_club_wide:
@@ -123,7 +126,7 @@ def edit_challenge(challenge_id):
         challenge.submission_requirements = request.form.get("submission_requirements", "").strip()
         challenge.release_date = datetime.strptime(request.form.get("release_date"), "%Y-%m-%d").date()
         challenge.deadline = datetime.fromisoformat(request.form.get("deadline"))
-
+        challenge.verification_mode = clean_mode(request.form.get("verification_mode"))
         if not challenge.is_club_wide:
             dept_ids = [int(d) for d in request.form.getlist("departments")]
             allowed_ids = {d.id for d in departments}

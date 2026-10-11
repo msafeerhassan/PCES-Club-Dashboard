@@ -3,8 +3,8 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 from flask import Flask
 from werkzeug.middleware.proxy_fix import ProxyFix
 from app.config import Config
-from app.extensions import db, login_manager, oauth
-
+import os
+from app.extensions import db, login_manager, oauth, csrf, limiter
 def create_app(config_override=None):
     app = Flask(__name__)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
@@ -14,16 +14,21 @@ def create_app(config_override=None):
             dsn=Config.SENTRY_DSN,
             integrations=[FlaskIntegration()],
             traces_sample_rate=0.1,
-            environment="development",
+                        environment= os.environ.get("VERCEL_ENV", "development"),
         )
 
     app.config.from_object(Config)
 
+    app.config.update(config_override or {})
+
     db.init_app(app)
     login_manager.init_app(app)
     oauth.init_app(app)
+    csrf.init_app(app)
+    limiter.init_app(app)
 
     login_manager.login_view = "auth.login"
+    login_manager.login_message = None
 
     from app.utils.permissions import department_names_for_viewer, can_manage_event, can_manage_challenge
     app.jinja_env.globals["dept_names_for_viewer"] = department_names_for_viewer
@@ -59,6 +64,8 @@ def create_app(config_override=None):
     from app.routes.challenge_leaderboard import challenge_leaderboard_bp
     from app.routes.department_rankings import department_rankings_bp
     from app.routes.internal_cron import internal_cron_bp
+    from app.utils.lapse_oauth import init_lapse_oauth
+    from app.routes.lapse import bp as lapse_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -82,5 +89,20 @@ def create_app(config_override=None):
     app.register_blueprint(challenge_leaderboard_bp)
     app.register_blueprint(department_rankings_bp)
     app.register_blueprint(internal_cron_bp)
+    csrf.exempt(internal_cron_bp)
+
+    from app.routes.errors import register_error_handlers
+    register_error_handlers(app)
+
+    @app.after_request
+    def security_headers(resp):
+        resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+        resp.headers.setdefault("X-Frame-Options", "DENY")
+        resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        resp.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+        resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+        return resp
+    app.register_blueprint(lapse_bp)
+    init_lapse_oauth(app)
 
     return app

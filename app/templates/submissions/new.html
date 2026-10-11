@@ -4,6 +4,7 @@
 {% block content %}
 
 <form method="POST" enctype="multipart/form-data" class="form-panel">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <div class="form-card">
     <label>Title
       <input type="text" name="title" required>
@@ -56,6 +57,24 @@
         {% endfor %}
       </select>
     </label>
+
+    <div id="lapsePicker" style="display:none;">
+      {% set selected_lapse_id = '' %}
+      {% include "partials/lapse_picker.html" %}
+    </div>
+    <script>
+      (function () {
+        const modes = {{ lapse_modes | tojson }};
+        const sel = document.querySelector('select[name="event_id"]');
+        const box = document.getElementById('lapsePicker');
+        function sync() {
+          const m = modes[sel.value];
+          box.style.display = (m === 'BOTH' || m === 'LAPSE') ? 'block' : 'none';
+        }
+        sel.addEventListener('change', sync);
+        sync();
+      })();
+    </script>
 
 <p class="form-static" style="margin-top:-6px;">Your submission will be reviewed by leadership before it counts toward club stats.</p>
     <div class="form-actions">

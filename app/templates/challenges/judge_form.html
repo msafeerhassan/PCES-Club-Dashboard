@@ -50,6 +50,15 @@
       </div>
     </div>
 
+        {% if submission.lapse_status %}
+    <div class="card">
+      <div class="card-head"><span class="card-icon" style="background:var(--hc-red);">🎞</span><h2>Lapse evidence</h2></div>
+      {% with rec = submission %}{% include "partials/lapse_review.html" %}{% endwith %}
+    </div>
+    {% endif %}
+
+    {% if submission.challenge.verification_mode != 'LAPSE' %}
+
     <div class="card">
       <div class="card-head"><span class="card-icon" style="background:var(--hc-red);">⚡</span><h2>Hackatime evidence</h2></div>
       {% if evidence %}
@@ -72,7 +81,10 @@
     </div>
   </section>
 
+      {% endif %}
+
   <form method="POST" class="form-panel rubric-panel">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="form-card">
       {{ rubric_row('functionality_score', 'Functionality', 'Do the required features work, and is it actually usable?', submission.functionality_score) }}
       {{ rubric_row('complexity_score', 'Complexity', 'Meaningful depth beyond the minimum, not unnecessary complexity.', submission.complexity_score) }}

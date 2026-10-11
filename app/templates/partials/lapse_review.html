@@ -1,0 +1,16 @@
+{% if rec.lapse_status %}
+<div class="lapse-review lapse-{{ rec.lapse_status|lower }}">
+  <div class="lapse-review-head">
+    <span class="badge {{ 'badge-success' if rec.lapse_status == 'VERIFIED' else 'badge-danger' }}">
+      Lapse {{ 'verified' if rec.lapse_status == 'VERIFIED' else 'not verified' }}
+    </span>
+    {% if rec.lapse_duration %}<span class="lapse-meta">{{ (rec.lapse_duration / 60) | round | int }} min recorded</span>{% endif %}
+  </div>
+  {% if rec.lapse_status != 'VERIFIED' %}<p class="lapse-note">{{ rec.lapse_note }} Approving anyway is your override.</p>{% endif %}
+  {% if rec.lapse_title %}<p class="lapse-title">{{ rec.lapse_title }}</p>{% endif %}
+  {% if rec.lapse_playback_url %}
+  <video class="lapse-video" controls preload="none" src="{{ rec.lapse_playback_url }}"></video>
+  <a class="lapse-open" href="{{ rec.lapse_playback_url }}" target="_blank" rel="noopener noreferrer">Open video</a>
+  {% endif %}
+</div>
+{% endif %}

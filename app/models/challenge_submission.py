@@ -27,12 +27,16 @@ class ChallengeSubmission(db.Model):
     judge_feedback = db.Column(db.Text, nullable=True)
     judged_by_id = db.Column(db.Integer, db.ForeignKey("members.id"), nullable=True)
     judged_at = db.Column(db.DateTime, nullable=True)
-
+    lapse_timelapse_id = db.Column(db.String(32))
+    lapse_status = db.Column(db.String(16))      # VERIFIED / FAILED / NOT_CONNECTED / ERROR
+    lapse_note = db.Column(db.String(255))
+    lapse_duration = db.Column(db.Integer)       # seconds
+    lapse_playback_url = db.Column(db.String(500))
+    lapse_title = db.Column(db.String(200))
     challenge = db.relationship("Challenge", backref="submissions")
     member = db.relationship("Member", foreign_keys=[member_id], backref="challenge_submissions")
     department = db.relationship("Department")
-    judged_by = db.relationship("Member", foreign_keys=[judged_by_id])
-
+    judged_by = db.relationship("Member", foreign_keys=[judged_by_id])     # seconds
     __table_args__ = (db.UniqueConstraint("challenge_id", "member_id", name="uq_challenge_member"),)
 
     @property

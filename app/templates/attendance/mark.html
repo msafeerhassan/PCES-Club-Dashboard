@@ -4,6 +4,7 @@
 {% block content %}
 
 <form method="POST" id="attendanceForm">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <div class="attendance-summary">
     <span>Present: <strong id="presentCount">0</strong> / {{ eligible | length }}</span>
     <div style="display:flex; gap:8px;">

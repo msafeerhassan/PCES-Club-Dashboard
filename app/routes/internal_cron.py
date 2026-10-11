@@ -8,6 +8,9 @@ internal_cron_bp = Blueprint("internal_cron", __name__, url_prefix="/internal/cr
 
 @internal_cron_bp.route("/weekly-standings")
 def weekly_standings():
+    secret = current_app.config.get("CRON_SECRET")
+    if not secret or request.headers.get("Authorization") != f"Bearer {secret}":
+        abort(403)
     _check_department_rank_climbs()
     return {"status": "ok"}, 200
 
@@ -66,7 +69,7 @@ def _check_department_rank_climbs():
                             "🚀 Department Rank Climb", f"**{climber.name}** has overtaken **{overtaken.name}** in {metric}!",
                             color=0xFF8C37,
                         )
-                db.session.merge(DepartmentRankSnapshot(metric=metric, department_id=dept_id, rank=new_rank))
+                old.rank = new_rank
             elif not old:
                 db.session.add(DepartmentRankSnapshot(metric=metric, department_id=dept_id, rank=new_rank))
             else:

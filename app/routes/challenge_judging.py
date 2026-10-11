@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, abort
 from flask_login import login_required, current_user
 from app.extensions import db
+from app.utils.timeutil import club_now
 from app.models.challenge_submission import ChallengeSubmission
 from app.models.department import Department
 from app.utils.permissions import ADMIN_ROLES, can_manage_challenge_submission, assignable_departments
@@ -75,7 +76,7 @@ def judge_submission(submission_id):
         submission.judge_feedback = request.form.get("feedback", "").strip() or None
         submission.is_judged = True
         submission.judged_by_id = current_user.id
-        submission.judged_at = datetime.utcnow()
+        submission.judged_at = club_now()
         db.session.commit()
 
         if not was_judged:
@@ -131,7 +132,7 @@ def _check_rank_climb(department):
                         "📈 Rank Climb", f"**{climber.name}** has overtaken **{overtaken.name}** on the Challenge Leaderboard — now **#{new_rank}**!",
                         color=0xFF8C37,
                     )
-            db.session.merge(ChallengeRankSnapshot(department_id=department.id, member_id=member_id, rank=new_rank))
+            old.rank = new_rank
         elif not old:
             db.session.add(ChallengeRankSnapshot(department_id=department.id, member_id=member_id, rank=new_rank))
         else:

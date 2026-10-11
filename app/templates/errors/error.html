@@ -1,4 +1,6 @@
-{% extends "base.html" %}
+{% extends "base.html" if current_user.is_authenticated else "base_guest.html" %}
+{% block title %}{{ title }} - PCES{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
 {% block content %}
 <div class="card" style="max-width:480px;margin:60px auto;text-align:center;padding:40px 28px;">
   <div style="font-size:56px;font-weight:800;color:var(--hc-red);line-height:1;">{{ code }}</div>

@@ -3,8 +3,6 @@ from app.extensions import db
 from app.models.enums import SubmissionStatus
 from app.utils.timeutil import club_now
 
-submitted_at = db.Column(db.DateTime, default=club_now, nullable=False)
-
 class Submission(db.Model):
     __tablename__ = "submissions"
 
@@ -27,11 +25,16 @@ class Submission(db.Model):
     reviewed_by_id = db.Column(db.Integer, db.ForeignKey("members.id"), nullable=True)
     reviewed_at = db.Column(db.DateTime, nullable=True)
     feedback = db.Column(db.Text, nullable=True)
-
+    lapse_timelapse_id = db.Column(db.String(32))
+    lapse_status = db.Column(db.String(16))      # VERIFIED / FAILED / NOT_CONNECTED / ERROR
+    lapse_note = db.Column(db.String(255))
+    lapse_duration = db.Column(db.Integer)       # seconds
+    lapse_playback_url = db.Column(db.String(500))
+    lapse_title = db.Column(db.String(200))
     member = db.relationship("Member", backref="submissions", foreign_keys=[member_id])
     department = db.relationship("Department")
     event = db.relationship("Event", backref="submissions")
-    reviewed_by = db.relationship("Member", foreign_keys=[reviewed_by_id])
+    reviewed_by = db.relationship("Member", foreign_keys=[reviewed_by_id])     # seconds
 
     @property
     def is_late(self):

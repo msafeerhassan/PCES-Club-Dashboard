@@ -38,6 +38,12 @@
     <div class="adoption-bar-track"><div class="adoption-bar-fill" style="width: {{ data.adoption_pct }}%;"></div></div>
     <div class="health-card-value">{{ data.adoption_pct }}%</div>
   </div>
+    <div class="health-card">
+    <div class="health-card-label">Lapse adoption</div>
+    <div class="adoption-bar-track"><div class="adoption-bar-fill" style="width: {{ data.lapse_pct }}%;"></div></div>
+    <div class="health-card-value">{{ data.lapse_pct }}%</div>
+    {% if data.lapse_missing %}<p class="muted">Not connected: {{ data.lapse_missing|map(attribute='name')|join(', ') }}</p>{% endif %}
+  </div>
   <div class="health-card">
     <div class="health-card-label">Achievements earned</div>
     <div class="health-card-value">{{ data.achievements_earned }}</div>

@@ -43,6 +43,7 @@
       <a href="{{ url_for('admin.member_edit', member_id=m.id) }}" class="btn btn-small">Edit</a>
       {% if m.is_disabled %}
       <form method="POST" action="{{ url_for('admin.member_enable', member_id=m.id) }}" class="inline-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn-small">Enable</button>
       </form>
       {% else %}
@@ -50,6 +51,7 @@
       {% endif %}
       {% if m.id != current_user.id %}
       <form method="POST" action="{{ url_for('admin.member_delete', member_id=m.id) }}" class="inline-form" onsubmit="return confirm('Permanently delete ' + '{{ m.name }}' + '? This deletes all their submissions, attendance history, and achievements. This cannot be undone.');">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn-small" style="color:var(--hc-red);">Delete</button>
       </form>
       {% endif %}

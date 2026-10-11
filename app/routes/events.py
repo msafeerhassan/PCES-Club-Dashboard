@@ -10,7 +10,7 @@ from app.utils.permissions import (
     can_manage_event,
     assignable_event_departments,
 )
-
+from app.utils.lapse_client import clean_mode
 from app.models.attendance import Attendance
 from app.models.submission import Submission
 
@@ -40,7 +40,7 @@ def new_event():
         dept_ids = [int(d) for d in request.form.getlist("departments")]
         event_date = request.form.get("event_date")
         deadline_raw = request.form.get("submission_deadline")
-
+        verification_mode = clean_mode(request.form.get("verification_mode"))
         if current_user.role.value != "president":
             is_club_wide = False
 
@@ -61,6 +61,7 @@ def new_event():
             is_club_wide=is_club_wide,
             event_date=datetime.strptime(event_date, "%Y-%m-%d").date(),
             submission_deadline=deadline,
+            verification_mode=verification_mode,
             created_by_id=current_user.id,
         )
         if not is_club_wide:
@@ -97,7 +98,7 @@ def edit_event(event_id):
         event.event_date = datetime.strptime(request.form.get("event_date"), "%Y-%m-%d").date()
         deadline_raw = request.form.get("submission_deadline")
         event.submission_deadline = datetime.fromisoformat(deadline_raw) if deadline_raw else None
-
+        event.verification_mode = clean_mode(request.form.get("verification_mode"))
         if not event.is_club_wide:
             dept_ids = [int(d) for d in request.form.getlist("departments")]
             allowed_ids = {d.id for d in departments}

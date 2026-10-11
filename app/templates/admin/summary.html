@@ -37,6 +37,15 @@
 </div>
 {% endif %}
 
+{% if lapse_missing %}
+<div class="lapse-banner" role="alert">
+  <div>
+    <strong>{{ lapse_missing|length }} member{{ '' if lapse_missing|length == 1 else 's' }} not connected to Lapse:</strong>
+    {{ lapse_missing[:8]|map(attribute='name')|join(', ') }}{% if lapse_missing|length > 8 %} and {{ lapse_missing|length - 8 }} more{% endif %}
+  </div>
+</div>
+{% endif %}
+
 <div class="summary-stat-grid">
   <div class="summary-stat-card">
     <span class="summary-stat-icon"><svg class="kpi-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg></span>

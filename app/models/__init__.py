@@ -15,3 +15,4 @@ from app.models.challenge_submission import ChallengeSubmission
 from app.models.challenge_submission_file import ChallengeSubmissionFile
 from app.models.rank_snapshot import ChallengeRankSnapshot, DepartmentRankSnapshot
 from app.models.member_achievement import MemberAchievement
+from app.models.lapse_connection import LapseConnection

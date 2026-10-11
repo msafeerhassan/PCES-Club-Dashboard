@@ -90,6 +90,7 @@ def build_summary_data(current_user):
 
     connected_count = sum(1 for m in members if m.hackatime_connection)
     hackatime_adoption_pct = round((connected_count / total_members) * 100, 1) if total_members else 0
+    lapse_missing = [m for m in members if m.lapse_connection is None and not m.is_disabled]
     disabled_count = sum(1 for m in members if m.is_disabled)
     featured_count = Submission.query.filter(
         Submission.member_id.in_(member_ids), Submission.is_featured == True
@@ -140,6 +141,7 @@ def build_summary_data(current_user):
         "overall_attendance_rate": overall_attendance_rate,
         "connected_count": connected_count,
         "hackatime_adoption_pct": hackatime_adoption_pct,
+        "lapse_missing": lapse_missing,
         "disabled_count": disabled_count,
         "featured_count": featured_count,
         "next_event": next_event,
@@ -362,6 +364,8 @@ def department_health():
         "top_contributors": contributors[:5],
         "active_now": active_now,
         "adoption_pct": round((connected_count / len(members)) * 100, 1) if members else 0,
+        "lapse_missing": [m for m in members if m.lapse_connection is None and not m.is_disabled],
+        "lapse_pct": round(sum(1 for m in members if m.lapse_connection) / len(members) * 100, 1) if members else 0,
         "achievements_earned": achievements_earned,
         "challenge_points": sum(dept_scores),
         "challenge_avg": round(sum(dept_scores) / len(dept_scores), 1) if dept_scores else None,

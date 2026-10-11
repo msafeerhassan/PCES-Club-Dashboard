@@ -16,6 +16,7 @@
   {% endif %}
 
   <form method="POST" class="form-card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Title <input type="text" name="title" value="{{ submission.title }}" required></label>
     <label>Description <textarea name="description">{{ submission.description or '' }}</textarea></label>
     <div class="form-row-2">
@@ -30,6 +31,10 @@
         {% endfor %}
       </select>
     </label>
+        {% if lapse_mode in ('BOTH', 'LAPSE') %}
+    {% set selected_lapse_id = submission.lapse_timelapse_id or '' %}
+    {% include "partials/lapse_picker.html" %}
+    {% endif %}
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">Resubmit for review</button>
       <a href="{{ url_for('submissions.my_submissions') }}" class="btn">Cancel</a>

@@ -3,6 +3,16 @@
 {% block page_title %}Dashboard{% endblock %}
 {% block content %}
 
+{% if lapse_missing %}
+<div class="lapse-banner" role="alert">
+  <div>
+    <strong>URGENT: Lapse not connected.</strong>
+    Connecting Lapse is mandatory for every member. Until you do, your submissions are flagged and may be rejected.
+  </div>
+  <a class="btn" href="{{ url_for('lapse.connect') }}">Connect Lapse now</a>
+</div>
+{% endif %}
+
 <div class="home-hero-v2" id="homeHero">
   <p class="home-eyebrow">{{ member.role.value.replace('_', ' ')|title }}</p>
   <h2 class="home-hero-title">Welcome back, <span class="marker-highlight">{{ member.name.split(' ')[0] }}</span></h2>

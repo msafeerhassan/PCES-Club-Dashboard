@@ -33,3 +33,6 @@ class Config:
     MAX_CONTENT_LENGTH = 4 * 1024 * 1024   # Vercel rejects >4.5 MB anyway
     WTF_CSRF_TIME_LIMIT = None             # token lives as long as the session
     SESSION_COOKIE_HTTPONLY = True
+    LAPSE_CLIENT_ID = os.environ.get("LAPSE_CLIENT_ID")
+    LAPSE_CLIENT_SECRET = os.environ.get("LAPSE_CLIENT_SECRET")
+    LAPSE_API_BASE = os.environ.get("LAPSE_API_BASE", "https://api.lapse.hackclub.com/api")

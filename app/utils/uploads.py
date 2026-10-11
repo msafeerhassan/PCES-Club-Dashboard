@@ -1,6 +1,8 @@
 import os
 
-ALLOWED_EXT = {"pdf", "png", "jpg", "jpeg", "webp", "gif", "zip", "txt", "md", "py", "js", "ts", "html", "css", "json", "csv", "pptx", "docx", "ipynb"}
+ALLOWED_EXT = {"pdf", "png", "jpg", "jpeg", "webp", "gif", "zip", "txt", "md", "py", "js", "ts", "html", "css", "json", "csv", "pptx", "docx", "ipynb",
+               "stl", "step", "stp", "obj", "3mf", "dxf", "dwg", "f3d", "fcstd", "sldprt",
+               "c", "cpp", "h", "java", "kt", "rs", "go", "ino", "mp4", "mov", "webm"}
 IMAGE_EXT = {"png", "jpg", "jpeg", "webp", "gif"}
 MAX_TOTAL_BYTES = 4 * 1024 * 1024
 

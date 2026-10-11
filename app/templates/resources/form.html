@@ -3,6 +3,7 @@
 {% block page_title %}Add resource{% endblock %}
 {% block content %}
 <form method="POST" class="form-panel">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <div class="form-card">
     <label>Title <input type="text" name="title" required></label>
     <label>URL <input type="url" name="url" required></label>

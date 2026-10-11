@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, abort, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, abort, current_app, flash
 from flask_login import login_required, current_user
 from app.extensions import db, oauth
 from app.models.submission import Submission
@@ -6,6 +6,8 @@ from app.models.event import Event
 from app.models.member import Member
 from app.utils.permissions import visible_departments, can_manage_submission, can_view_submission, VIEW_ALL_ROLES
 from app.utils.storage import upload_submission_files
+from app.utils.uploads import validate_uploads, IMAGE_EXT
+from app.utils.lapse_client import needs_lapse, timelapse_options, apply_lapse, event_window
 from app.models.submission_file import SubmissionFile
 from app.models.submission_screenshot import SubmissionScreenshot
 from app.models.enums import SubmissionStatus
@@ -14,7 +16,6 @@ from app.models.department import Department
 from app.utils.timeutil import club_now
 
 submissions_bp = Blueprint("submissions", __name__, url_prefix="/submissions")
-
 
 @submissions_bp.route("/new", methods=["GET", "POST"])
 @login_required
@@ -25,7 +26,6 @@ def new_submission():
 
     resp = oauth.hackatime.get("api/v1/authenticated/projects", token={"access_token": connection.access_token})
     hackatime_projects = [p["name"] for p in resp.json().get("projects", [])] if resp.status_code == 200 else []
-    from datetime import datetime
 
     from app.utils.dashboard_helpers import get_eligible_events
     eligible_events = get_eligible_events(current_user)
@@ -36,6 +36,20 @@ def new_submission():
 
     member_departments = current_user.departments
 
+    lapse_modes = {e.id: e.verification_mode for e in eligible_events}
+    if any(needs_lapse(m) for m in lapse_modes.values()):
+        lapse_options, lapse_error = timelapse_options(current_user.lapse_connection)
+    else:
+        lapse_options, lapse_error = [], None
+
+    def render(error=None):
+        return render_template(
+            "submissions/new.html", hackatime_projects=hackatime_projects,
+            eligible_events_annotated=eligible_events_annotated, member_departments=member_departments,
+            error=error, lapse_modes=lapse_modes, lapse_options=lapse_options, lapse_error=lapse_error,
+            lapse_connected=current_user.lapse_connection is not None,
+        )
+
     if request.method == "POST":
         title = request.form.get("title", "").strip()
         description = request.form.get("description", "").strip()
@@ -44,15 +58,15 @@ def new_submission():
         demo_url = request.form.get("demo_url", "").strip() or None
         github_url = request.form.get("github_url", "").strip() or None
 
+        upload_error = validate_uploads(request.files.getlist("project_files"))
+        if upload_error:
+            return render(error=upload_error)
+
         department = None
         if len(member_departments) > 1:
             department_id = request.form.get("department_id")
             if not department_id:
-                return render_template(
-                    "submissions/new.html", hackatime_projects=hackatime_projects,
-                    eligible_events_annotated=eligible_events_annotated, member_departments=member_departments,
-                    error="Select which department this project belongs to."
-                )
+                return render(error="Select which department this project belongs to.")
             department_id = int(department_id)
             if department_id not in {d.id for d in member_departments}:
                 abort(403)
@@ -79,21 +93,27 @@ def new_submission():
         db.session.add(submission)
         db.session.flush()
 
+        lapse_result = None
+        if event:
+            lapse_result = apply_lapse(
+                submission, event.verification_mode, current_user, request.form.get("lapse_timelapse_id"),
+                hackatime_project_name, event_window(event, club_now()),
+            )
+
         uploaded_files = upload_submission_files(current_app, request.files.getlist("project_files"))
         for url, name in uploaded_files:
             db.session.add(SubmissionFile(submission_id=submission.id, file_url=url, file_name=name))
 
         db.session.commit()
+
+        if lapse_result and lapse_result["status"] != "VERIFIED":
+            flash("Project submitted, but the Lapse check did not pass (" + lapse_result["note"]
+                  + "). An admin will review it manually.", "warning")
+        else:
+            flash("Project submitted for review.", "success")
         return redirect(url_for("submissions.my_submissions"))
 
-    return render_template(
-        "submissions/new.html",
-        hackatime_projects=hackatime_projects,
-        eligible_events_annotated=eligible_events_annotated,
-        member_departments=member_departments,
-        error=None,
-    )
-
+    return render()
 
 @submissions_bp.route("/mine")
 @login_required
@@ -169,12 +189,9 @@ def hackatime_detail(submission_id):
 @submissions_bp.route("/<int:submission_id>/feature", methods=["GET", "POST"])
 @login_required
 def feature_submission(submission_id):
-    if current_user.role.value not in ("president", "vp_boys", "vp_girls"):
-        abort(403)
-
     submission = Submission.query.get_or_404(submission_id)
 
-    if not can_manage_submission(current_user, submission.member):
+    if not can_manage_submission(current_user, submission):
         abort(403)
 
     if submission.status != SubmissionStatus.APPROVED:
@@ -184,6 +201,9 @@ def feature_submission(submission_id):
         )
 
     if request.method == "POST":
+        shot_error = validate_uploads(request.files.getlist("screenshots"), IMAGE_EXT)
+        if shot_error:
+            return render_template("submissions/feature_form.html", submission=submission, error=shot_error)
         uploaded = upload_submission_files(current_app, request.files.getlist("screenshots"))
         for url, _ in uploaded:
             db.session.add(SubmissionScreenshot(submission_id=submission.id, image_url=url))
@@ -225,7 +245,7 @@ def approve_submission(submission_id):
 
     submission.status = SubmissionStatus.APPROVED
     submission.reviewed_by_id = current_user.id
-    submission.reviewed_at = datetime.utcnow()
+    submission.reviewed_at = club_now()
     db.session.commit()
 
     from app.utils.discord_notify import notify_scoped
@@ -252,7 +272,7 @@ def reject_submission(submission_id):
 
         submission.status = SubmissionStatus.REJECTED
         submission.reviewed_by_id = current_user.id
-        submission.reviewed_at = datetime.utcnow()
+        submission.reviewed_at = club_now()
         submission.feedback = feedback
         submission.is_featured = False
         db.session.commit()
@@ -283,6 +303,13 @@ def edit_submission(submission_id):
         resp = oauth.hackatime.get("api/v1/authenticated/projects", token={"access_token": connection.access_token})
         hackatime_projects = [p["name"] for p in resp.json().get("projects", [])] if resp.status_code == 200 else []
 
+    event = submission.event
+    mode = event.verification_mode if event else "HACKATIME"
+    if needs_lapse(mode):
+        lapse_options, lapse_error = timelapse_options(current_user.lapse_connection)
+    else:
+        lapse_options, lapse_error = [], None
+
     if request.method == "POST":
         submission.title = request.form.get("title", "").strip()
         submission.description = request.form.get("description", "").strip()
@@ -295,11 +322,27 @@ def edit_submission(submission_id):
         submission.reviewed_at = None
         submission.feedback = None
 
+        lapse_result = None
+        if event:
+            lapse_result = apply_lapse(
+                submission, mode, current_user, request.form.get("lapse_timelapse_id"),
+                submission.hackatime_project_name, event_window(event, club_now()),
+            )
+
         db.session.commit()
+
+        if lapse_result and lapse_result["status"] != "VERIFIED":
+            flash("Resubmitted, but the Lapse check did not pass (" + lapse_result["note"]
+                  + "). An admin will review it manually.", "warning")
+        else:
+            flash("Resubmitted for review.", "success")
         return redirect(url_for("submissions.my_submissions"))
 
-    return render_template("submissions/edit.html", submission=submission, hackatime_projects=hackatime_projects)
-
+    return render_template(
+        "submissions/edit.html", submission=submission, hackatime_projects=hackatime_projects,
+        lapse_mode=mode, lapse_options=lapse_options, lapse_error=lapse_error,
+        lapse_connected=current_user.lapse_connection is not None,
+    )
 @submissions_bp.route("/<int:submission_id>/delete", methods=["POST"])
 @login_required
 def delete_submission(submission_id):

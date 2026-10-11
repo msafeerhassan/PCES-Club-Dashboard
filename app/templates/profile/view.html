@@ -12,6 +12,15 @@
 <p>Department(s): {{ (member.departments | map(attribute='name') | join(', ')) if member.departments else 'None assigned' }}</p>
       {% if member.is_active_account %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-danger">Not yet claimed</span>{% endif %}
       {% if member.hackatime_connection %}<span class="badge badge-success">Hackatime connected</span>{% else %}<span class="badge">Hackatime not connected</span>{% endif %}
+            {% if member.lapse_connection %}
+      <span class="badge badge-success">Lapse connected</span>
+      <form method="POST" action="{{ url_for('lapse.disconnect') }}" class="inline-form" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-small">Disconnect Lapse</button>
+      </form>
+      {% else %}
+      <a href="{{ url_for('lapse.connect') }}" class="btn btn-small">Connect Lapse</a>
+      {% endif %}
     </div>
     <div class="profile-hero-email">{{ member.email }} · Joined {{ member.created_at.strftime('%b %d, %Y') }}</div>
   </div>

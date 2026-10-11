@@ -3,6 +3,7 @@
 {% block page_title %}New announcement{% endblock %}
 {% block content %}
 <form method="POST" class="form-panel">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <div class="form-card">
     {% if error %}<p style="color:var(--hc-red); font-weight:700;">{{ error }}</p>{% endif %}
 

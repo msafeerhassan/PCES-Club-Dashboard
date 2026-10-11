@@ -7,7 +7,7 @@ from app.utils.dashboard_helpers import get_pending_tasks, get_upcoming_events
 from app.routes.admin import build_summary_data
 from app.utils.hackatime_client import get_weekly_trend
 from app.models.announcement import Announcement
-
+from app.utils.dashboard_helpers import get_pending_tasks, get_upcoming_events, lapse_required
 dashboard_bp = Blueprint("dashboard", __name__, url_prefix="/dashboard")
 
 
@@ -55,6 +55,7 @@ def index():
         departments=departments,
         read_only=is_read_only_admin(current_user),
         hackatime_connected=connection is not None,
+        lapse_missing=lapse_required(current_user) and current_user.lapse_connection is None,
         recent_seconds=recent_seconds,
         pending_tasks=pending_tasks,
         upcoming_events=upcoming_events,

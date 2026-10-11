@@ -1,0 +1,22 @@
+<div class="lapse-box">
+  <div class="lapse-box-head">
+    <span class="badge badge-blue">Lapse</span>
+    <strong>Attach a Lapse timelapse</strong>
+  </div>
+  {% if not lapse_connected %}
+  <p class="lapse-note">Your admin wants a Lapse timelapse for this. You haven't connected Lapse yet.</p>
+  <a class="btn btn-small" href="{{ url_for('lapse.connect') }}">Connect Lapse</a>
+  <p class="field-hint">You can still submit without it. An admin will review your submission manually.</p>
+  {% else %}
+  {% if lapse_error %}<p class="lapse-note lapse-note-warn">{{ lapse_error }} <a href="{{ url_for('lapse.connect') }}">Reconnect</a></p>{% endif %}
+  <label>Timelapse
+    <select name="lapse_timelapse_id">
+      <option value="">-- none --</option>
+      {% for t in lapse_options %}
+      <option value="{{ t.id }}" {{ 'selected' if t.id == selected_lapse_id else '' }}>{{ t.name }} · {{ t.minutes }} min · {{ t.created }} · {{ t.project or 'no project linked' }}{{ '' if t.visibility == 'PUBLIC' else ' · ' ~ (t.visibility or '')|lower }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <p class="field-hint">It must be PUBLIC, recorded inside the allowed window, and linked to the Hackatime project selected above.</p>
+  {% endif %}
+</div>

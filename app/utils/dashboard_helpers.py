@@ -15,8 +15,16 @@ def get_upcoming_events(member, limit=5):
     return events[:limit]
 
 
+def lapse_required(member):
+    from app.models.enums import RoleEnum
+    return member.role != RoleEnum.FACULTY_ADVISOR
+
+
 def get_pending_tasks(member, previous_login=None):
     tasks = []
+
+    if lapse_required(member) and member.lapse_connection is None:
+        tasks.append("URGENT: Connect your Lapse account (required)")
 
     if member.hackatime_connection is None:
         tasks.append("Connect your Hackatime account")

@@ -25,6 +25,7 @@
         <a href="{{ r.url }}" target="_blank" rel="noopener noreferrer" class="link-chip">Open →</a>
         {% if is_admin %}
         <form method="POST" action="{{ url_for('resources.delete_resource', resource_id=r.id) }}" class="inline-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="btn btn-small">Delete</button>
         </form>
         {% endif %}

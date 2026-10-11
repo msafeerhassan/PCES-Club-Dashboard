@@ -4,6 +4,7 @@
 {% block content %}
 <div class="form-panel">
   <form method="POST" class="form-card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Member
       <select name="member_id" required>
         {% for m in candidates %}

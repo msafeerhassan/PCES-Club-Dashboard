@@ -12,6 +12,7 @@
   {% if error %}<p style="color:var(--hc-red); font-weight:700; margin-bottom:14px;">{{ error }}</p>{% endif %}
 
   <form method="POST" class="form-card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Feedback (required)
       <textarea name="feedback" required></textarea>
     </label>

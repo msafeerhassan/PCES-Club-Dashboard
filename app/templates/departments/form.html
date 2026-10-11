@@ -6,6 +6,7 @@
 <div class="form-panel">
   {% if error %}<p style="color:var(--hc-red); font-weight:700; margin-bottom:14px;">{{ error }}</p>{% endif %}
   <form method="POST" class="form-card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Department name
       <input type="text" name="name" value="{{ department.name if department else '' }}" placeholder="e.g. Computer Science - Tier 1 - Boys" required>
     </label>

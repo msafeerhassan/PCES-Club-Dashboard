@@ -8,10 +8,12 @@ from app.models.enums import RoleEnum
 
 @pytest.fixture
 def app():
-    flask_app = create_app()
-    flask_app.config.update({
+    flask_app = create_app({
         "TESTING": True,
         "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
+        "WTF_CSRF_ENABLED": False,
+        "SECRET_KEY": "test-secret",
+        "CRON_SECRET": "test-cron",
     })
     with flask_app.app_context():
         _db.create_all()
